@@ -12,45 +12,24 @@ interface AIContextType {
   clearMessages: () => void;
 }
 
-interface ChatGPTResponse {
-  choices: {
-    message: {
-      content: string;
-    };
-  }[];
-}
-
-const AIContext = createContext<AIContextType | undefined>(undefined);
-
-// Function to process text with ChatGPT API
+// Function to process text with ChatGPT API via RapidAPI
 const processChatGPT = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('https://chatgpt-api.shn.hk/v1/', {
-      method: 'POST',
+    const encodedPrompt = encodeURIComponent(prompt);
+    const response = await fetch(`https://free-chatgpt-api.p.rapidapi.com/chat-completion-one?prompt=${encodedPrompt}`, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a nutrition AI assistant that helps users track their calories. Analyze food descriptions and return calorie estimates in JSON format.'
-          },
-          {
-            role: 'user', 
-            content: prompt
-          }
-        ]
-      }),
+        'x-rapidapi-host': 'free-chatgpt-api.p.rapidapi.com',
+        'x-rapidapi-key': 'f8720c2735msh73cb6a2df67e695p12c409jsn6cbdb1f8133e'
+      }
     });
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    const data: ChatGPTResponse = await response.json();
-    return data.choices[0].message.content;
+    const data = await response.json();
+    return data.response || data.message || "No response";
   } catch (error) {
     console.error('Error calling ChatGPT API:', error);
     throw error;
@@ -222,7 +201,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       
       setMessages(prev => [...prev, userMessage]);
       
-      // Process with ChatGPT API - note that this free API doesn't support image processing
+      // Process with ChatGPT API - note this API doesn't support image processing
       // so we'll send a message saying we're analyzing an image
       const prompt = `
         I'm looking at a photo of food. Let's assume it contains common items like a sandwich, 
