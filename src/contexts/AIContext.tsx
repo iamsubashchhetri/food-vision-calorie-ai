@@ -17,13 +17,9 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      console.error('Gemini API key is missing');
-      throw new Error('API key not configured');
-    }
-
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ', {
+    const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
