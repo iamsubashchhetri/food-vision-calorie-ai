@@ -16,25 +16,44 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 // Function to generate mock responses
 const generateMockResponse = async (prompt: string): Promise<string> => {
-  const mockResponses = [
-    {
-      name: "Milk",
-      calories: 103,
-      serving: "1 cup"
-    },
-    {
-      name: "Bread",
-      calories: 79,
-      serving: "1 slice"
-    },
-    {
-      name: "Peanut Butter",
-      calories: 95,
-      serving: "1 tablespoon"
-    }
-  ];
+  // Parse user input into food items
+  const foodRegex = /(\d*\.?\d*)\s*(cup|slice|tablespoon|tbsp|tsp|teaspoon|g|gram|ml|piece|pieces|whole|medium|large|small)?\s*(?:of\s+)?([a-zA-Z\s]+)/g;
+  const matches = [...prompt.matchAll(foodRegex)];
   
-  return JSON.stringify(mockResponses);
+  const foodItems = matches.map(match => {
+    const quantity = match[1] ? parseFloat(match[1]) : 1;
+    const unit = match[2] || "serving";
+    const name = match[3].trim();
+    
+    // Simplified calorie estimation (you can expand this)
+    const calorieEstimates: { [key: string]: number } = {
+      milk: 103,
+      bread: 79,
+      "peanut butter": 95,
+      apple: 95,
+      banana: 105,
+      orange: 62,
+      eggs: 70,
+      rice: 130,
+      chicken: 165,
+      beef: 250,
+    };
+    
+    const baseCals = calorieEstimates[name.toLowerCase()] || 100;
+    const calories = Math.round(baseCals * quantity);
+    
+    return {
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      calories,
+      serving: `${quantity} ${unit}`
+    };
+  });
+  
+  return JSON.stringify(foodItems.length > 0 ? foodItems : [{
+    name: prompt,
+    calories: 100,
+    serving: "1 serving"
+  }]);
 };
 
 // Parse the ChatGPT response to extract food items and calories
