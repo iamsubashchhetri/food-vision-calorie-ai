@@ -152,12 +152,34 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Convert data URL to base64
       const base64Image = imageUrl.split(',')[1];
       
-      const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-      const genAI = new GoogleGenerativeAI(API_KEY);
+      const API_KEY = 'YOUR_GEMINI_API_KEY'; // Replace with your actual API key
       
-      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-      
-      const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=' + API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                inlineData: {
+                  mimeType: 'image/jpeg',
+                  data: base64Image,
+                },
+              },
+              {
+                text: 'Analyze this food image and provide the response in exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.',
+              },
+            ],
+          }],
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const geminiOutput = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       
       const geminiResult = await model.generateContent([
         prompt,
@@ -169,21 +191,14 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       ]);
       
-      const response = await geminiResult.response;
-      const responseText = response.text();
-
-      if (!responseText) {
-        throw new Error(`Gemini API request failed: Empty response`);
-      }
-
-      console.log('Gemini API Response:', responseText); // For debugging
+      console.log('Gemini API Response:', geminiOutput);
 
       // Parse the response and extract food items
       let foodItems: FoodItem[] = [];
       try {
         // Clean up the response text and extract JSON
-        const jsonMatch = responseText.match(/\[.*\]/s);
-        const jsonStr = jsonMatch ? jsonMatch[0] : responseText;
+        const jsonMatch = geminiOutput.match(/\[.*\]/s);
+        const jsonStr = jsonMatch ? jsonMatch[0] : geminiOutput;
         const parsedItems = JSON.parse(jsonStr);
         
         foodItems = parsedItems.map((item: any) => ({
