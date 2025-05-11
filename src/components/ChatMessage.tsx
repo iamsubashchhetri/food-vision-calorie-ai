@@ -30,7 +30,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-gray-100 text-gray-800 rounded-tl-none'
         }`}
       >
-        <p className="whitespace-pre-wrap">{formatContent(message.content)}</p>
+        <p className="whitespace-pre-wrap">{formatContent(content)}</p>
         <span className={`text-xs mt-1 block ${isUser ? 'text-brand-primary-foreground opacity-80' : 'text-gray-500'}`}>
           {formattedTime}
         </span>
