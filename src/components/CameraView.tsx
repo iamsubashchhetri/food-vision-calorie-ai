@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useRef, useEffect } from "react";
 import { Camera, X } from "lucide-react";
 
 interface CameraViewProps {
@@ -8,21 +9,52 @@ interface CameraViewProps {
 
 const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleCapture = () => {
-    // Implement actual camera functionality here if applicable
-    // For now, we will use a mock URL for demonstration
-    const mockUrl = "https://picsum.photos/400/300";
-    setCapturedImageUrl(mockUrl);
-    onCapture(mockUrl); // Pass the mock URL to the onCapture callback
+  useEffect(() => {
+    startCamera();
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' },
+        audio: false 
+      });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error("Error accessing camera:", err);
+    }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setCapturedImageUrl(imageUrl);
-      onCapture(imageUrl); // Pass the image URL to the onCapture callback
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  const handleCapture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageUrl = canvas.toDataURL('image/jpeg');
+        setCapturedImageUrl(imageUrl);
+        stopCamera();
+        onCapture(imageUrl);
+      }
     }
   };
 
@@ -33,7 +65,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
           <X size={24} />
         </button>
         <span className="text-white">Take Photo</span>
-        <div className="w-8"></div> {/* Spacer for alignment */}
+        <div className="w-8"></div>
       </div>
 
       <div className="flex-1 flex items-center justify-center">
@@ -51,20 +83,18 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 w-full h-full flex items-center justify-center text-gray-400">
-            <div className="text-center">
-              <Camera size={48} className="mx-auto mb-2" />
-              <p>Select or take a picture of your food</p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="mt-4"
-              />
-            </div>
+          <div className="relative w-full h-full bg-black">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
           </div>
         )}
       </div>
+
+      <canvas ref={canvasRef} className="hidden" />
 
       <div className="p-8 flex justify-center">
         <button
