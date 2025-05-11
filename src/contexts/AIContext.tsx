@@ -1,3 +1,6 @@
+I will integrate Gemini API for image analysis by adding the `analyzeImageWithGemini` function and modifying the `processImage` function.
+</tool_code>
+```replit_final_file
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -15,7 +18,36 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-const generateResponse = async (prompt: string): Promise<string> => {
+const analyzeImageWithGemini = async (imageBase64: string): Promise<string> => {
+  try {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyApHWVU-ozOdkE-zllCXuBR_m9kioHK5Wg', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: "Analyze this food image and tell me what food items are present and their estimated calories. Format the response as a JSON array with 'name' and 'calories' fields." },
+            { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.candidates[0]?.content?.parts[0]?.text || '';
+  } catch (error) {
+    console.error('Error analyzing image:', error);
+    throw error;
+  }
+};
+
+const generateResponse = async (prompt: string, retries = 2): Promise<string> => {
   try {
     const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
     if (!apiKey) {
@@ -57,150 +89,9 @@ const generateResponse = async (prompt: string): Promise<string> => {
       console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
-    
+
     const aiResponse = data.choices[0].message.content;
 
     try {
       // Remove markdown code block if present
-      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
-      const parsedResponse = JSON.parse(jsonStr);
-      if (Array.isArray(parsedResponse)) {
-        return jsonStr;
-      }
-    } catch (e) {
-      console.error('Invalid JSON response from AI:', aiResponse);
-    }
-
-    // Default response if parsing fails
-    return JSON.stringify([{
-      name: prompt.trim(),
-      calories: 0,
-      serving: "1 serving"
-    }]);
-
-  } catch (error) {
-    console.error('Error in generateResponse:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    return JSON.stringify([]);
-  }
-};
-
-const parseChatGPTResponse = (responseText: string): FoodItem[] => {
-  try {
-    const jsonData = JSON.parse(responseText);
-    if (Array.isArray(jsonData)) {
-      return jsonData.map(item => ({
-        id: uuidv4(),
-        name: item.name || "Unknown food",
-        calories: parseInt(item.calories) || 0,
-        serving: item.serving || "1 serving"
-      }));
-    }
-    return [];
-  } catch (error) {
-    console.error('Error parsing response:', error);
-    return [];
-  }
-};
-
-export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const processTextInput = async (text: string): Promise<FoodItem[]> => {
-    try {
-      setIsProcessing(true);
-      const userMessage: Message = {
-        id: uuidv4(),
-        role: 'user',
-        content: text,
-        timestamp: formatISO(new Date())
-      };
-
-      setMessages(prev => [...prev, userMessage]);
-      const response = await generateResponse(text);
-      const result = parseChatGPTResponse(response);
-
-      const foodNames = result.map(item => item.name).join(', ');
-      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
-
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: `I detected: ${foodNames}. Total calories: ${totalCalories} kcal.`,
-        timestamp: formatISO(new Date())
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      return result;
-    } catch (error) {
-      console.error('Error processing text:', error);
-      return [];
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const processImage = async (imageUrl: string): Promise<FoodItem[]> => {
-    try {
-      setIsProcessing(true);
-      const userMessage: Message = {
-        id: uuidv4(),
-        role: 'user',
-        content: '📷 [Image uploaded]',
-        timestamp: formatISO(new Date())
-      };
-
-      setMessages(prev => [...prev, userMessage]);
-      const response = await generateResponse("Default food item");
-      const result = parseChatGPTResponse(response);
-
-      if (result.length > 0) {
-        result[0].imageUrl = imageUrl;
-      }
-
-      const foodNames = result.map(item => item.name).join(', ');
-      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
-
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
-        timestamp: formatISO(new Date())
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      return result;
-    } catch (error) {
-      console.error('Error processing image:', error);
-      return [];
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const clearMessages = () => {
-    setMessages([]);
-  };
-
-  const value: AIContextType = {
-    messages,
-    isProcessing,
-    processTextInput,
-    processImage,
-    clearMessages
-  };
-
-  return <AIContext.Provider value={value}>{children}</AIContext.Provider>;
-};
-
-export const useAI = (): AIContextType => {
-  const context = useContext(AIContext);
-  if (context === undefined) {
-    throw new Error('useAI must be used within an AIProvider');
-  }
-  return context;
-};
+      const jsonStr = aiResponse.replace(/```json\n|\n
