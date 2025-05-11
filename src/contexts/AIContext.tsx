@@ -18,9 +18,10 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)\s*(?:,|where)?\s*serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)?\s+(\d+)\s+(?:calorie|kcal)/i;
+    const match = prompt.match(foodMatch);
 
-    if (foodMatch) {
-      const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = foodMatch;
+    if (match) {
+      const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = match;
       const total = parseFloat(totalAmount);
       const serving = parseFloat(servingSize);
       const calsPerServing = parseFloat(caloriesPerServing);
