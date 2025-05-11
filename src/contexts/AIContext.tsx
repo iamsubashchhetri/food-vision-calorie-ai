@@ -145,11 +145,64 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, userMessage]);
-      const response = await generateResponse("Default food item");
-      const result = parseChatGPTResponse(response);
 
-      if (result.length > 0) {
-        result[0].imageUrl = imageUrl;
+      // Convert data URL to base64
+      const base64Image = imageUrl.split(',')[1];
+      
+      const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  text: "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions."
+                },
+                {
+                  inlineData: {
+                    mimeType: "image/jpeg",
+                    data: base64Image
+                  }
+                }
+              ]
+            }]
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Gemini API request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.candidates[0].content.parts[0].text;
+
+      // Parse the response and extract food items
+      let result: FoodItem[] = [];
+      try {
+        const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+        const parsedItems = JSON.parse(jsonStr);
+        result = parsedItems.map((item: any) => ({
+          id: uuidv4(),
+          name: item.name,
+          calories: parseInt(item.calories) || 0,
+          serving: item.serving,
+          imageUrl: imageUrl
+        }));
+      } catch (e) {
+        console.error('Error parsing Gemini response:', e);
+        result = [{
+          id: uuidv4(),
+          name: "Unknown food",
+          calories: 0,
+          serving: "1 serving",
+          imageUrl: imageUrl
+        }];
       }
 
       const foodNames = result.map(item => item.name).join(', ');
