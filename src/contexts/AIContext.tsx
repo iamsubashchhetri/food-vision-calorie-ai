@@ -62,15 +62,24 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('Invalid API response structure');
     }
     
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.choices[0].message.content || data.choices[0].message.reasoning || '';
 
     try {
-      // Remove markdown code block if present
-      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
-      const parsedResponse = JSON.parse(jsonStr);
-      if (Array.isArray(parsedResponse)) {
-        return jsonStr;
+      // Extract JSON array from the response
+      const jsonMatch = aiResponse.match(/\[.*?\]/s);
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[0].trim();
+        const parsedResponse = JSON.parse(jsonStr);
+        if (Array.isArray(parsedResponse)) {
+          return jsonStr;
+        }
       }
+      // If no JSON found, create a basic response
+      return JSON.stringify([{
+        name: prompt.trim(),
+        calories: 0,
+        serving: "1 serving"
+      }]);
     } catch (e) {
       console.error('Invalid JSON response from AI:', aiResponse);
     }
