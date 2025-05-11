@@ -23,14 +23,14 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer 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`
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "deepseek/deepseek-r1:free",
         messages: [{
           role: "system",
           content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
