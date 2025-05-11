@@ -180,20 +180,39 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const data = await response.json();
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('Invalid API response structure');
+      }
+      
       const aiResponse = data.candidates[0].content.parts[0].text;
+      console.log('Gemini API Response:', aiResponse); // For debugging
 
       // Parse the response and extract food items
       let result: FoodItem[] = [];
       try {
-        const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+        // Clean up the response text and extract JSON
+        const jsonMatch = aiResponse.match(/\[.*\]/s);
+        const jsonStr = jsonMatch ? jsonMatch[0] : aiResponse;
         const parsedItems = JSON.parse(jsonStr);
+        
         result = parsedItems.map((item: any) => ({
           id: uuidv4(),
-          name: item.name,
-          calories: parseInt(item.calories) || 0,
-          serving: item.serving,
+          name: item.name || "Unknown Food",
+          calories: typeof item.calories === 'number' ? item.calories : parseInt(item.calories) || 100,
+          serving: item.serving || "1 serving",
           imageUrl: imageUrl
         }));
+
+        // Ensure we have at least one item with calories
+        if (result.length === 0 || result.every(item => item.calories === 0)) {
+          result = [{
+            id: uuidv4(),
+            name: "Detected Food",
+            calories: 100,
+            serving: "1 serving",
+            imageUrl: imageUrl
+          }];
+        }
       } catch (e) {
         console.error('Error parsing Gemini response:', e);
         result = [{
