@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, X } from 'lucide-react';
 
 interface CameraViewProps {
