@@ -1,0 +1,73 @@
+[plugin:vite:react-swc] × cannot reassign to a variable declared with `const`
+    ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:21:1]
+ 18 │ const generateResponse = async (prompt: string): Promise<string> => {
+ 19 │   try {
+ 20 │     const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)\s*(?:,|where)?\s*serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)?\s+(\d+)\s+(?:calorie|kcal)/i;
+ 21 │     const match = prompt.match(foodMatch);
+    ·           ──┬──
+    ·             ╰── const variable was declared here
+ 22 │ 
+ 23 │     if (match) {
+ 24 │       const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = match;
+ 25 │       const total = parseFloat(totalAmount);
+ 26 │       const serving = parseFloat(servingSize);
+ 27 │       const calsPerServing = parseFloat(caloriesPerServing);
+ 28 │ 
+ 29 │       const totalCalories = Math.round((total / serving) * calsPerServing);
+ 30 │       console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
+ 31 │ 
+ 32 │       return JSON.stringify([{
+ 33 │         name: foodName.trim(),
+ 34 │         calories: totalCalories,
+ 35 │         serving: `${total}${unit1}`
+ 36 │       }]);
+ 37 │     }
+ 38 │ 
+ 39 │     const foodItems = [];
+ 40 │     const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
+ 41 │     let match;
+ 42 │ 
+ 43 │     while ((match = foodPattern.exec(prompt)) !== null) {
+    ·             ──┬──
+    ·               ╰── cannot reassign
+ 44 │       const itemText = match[1].trim();
+ 45 │       const nameMatch = /^(.+?)(?:\n|$)/i.exec(itemText);
+ 46 │       const servingMatch = /(\d+)\s*(?:serving|g|gm|gram)/i.exec(itemText);
+    ╰────
+  × the name `match` is defined multiple times
+    ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:21:1]
+ 18 │ const generateResponse = async (prompt: string): Promise<string> => {
+ 19 │   try {
+ 20 │     const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)\s*(?:,|where)?\s*serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)?\s+(\d+)\s+(?:calorie|kcal)/i;
+ 21 │     const match = prompt.match(foodMatch);
+    ·           ──┬──
+    ·             ╰── previous definition of `match` here
+ 22 │ 
+ 23 │     if (match) {
+ 24 │       const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = match;
+ 25 │       const total = parseFloat(totalAmount);
+ 26 │       const serving = parseFloat(servingSize);
+ 27 │       const calsPerServing = parseFloat(caloriesPerServing);
+ 28 │ 
+ 29 │       const totalCalories = Math.round((total / serving) * calsPerServing);
+ 30 │       console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
+ 31 │ 
+ 32 │       return JSON.stringify([{
+ 33 │         name: foodName.trim(),
+ 34 │         calories: totalCalories,
+ 35 │         serving: `${total}${unit1}`
+ 36 │       }]);
+ 37 │     }
+ 38 │ 
+ 39 │     const foodItems = [];
+ 40 │     const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
+ 41 │     let match;
+    ·         ──┬──
+    ·           ╰── `match` redefined here
+ 42 │ 
+ 43 │     while ((match = foodPattern.exec(prompt)) !== null) {
+ 44 │       const itemText = match[1].trim();
+    ╰────
+/home/runner/workspace/src/contexts/AIContext.tsx:21:1
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
