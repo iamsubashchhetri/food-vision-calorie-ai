@@ -23,11 +23,10 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': import.meta.env.VITE_GEMINI_API_KEY
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         contents: [{
@@ -44,14 +43,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
     if (!response.ok) {
       console.error('API Response:', response);
-      const errorData = await response.json().catch(() => ({}));
-      if (response.status === 401) {
-        throw new Error('Invalid Gemini API key');
-      } else if (response.status === 404) {
-        throw new Error('Invalid Gemini API endpoint');
-      } else {
-        throw new Error(`Gemini API error: ${errorData.error?.message || response.status}`);
-      }
+      throw new Error(`Request failed with status ${response.status}`);
     }
 
     const data = await response.json();
