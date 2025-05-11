@@ -182,7 +182,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `I detected: ${foodNames}. Total calories: ${totalCalories} kcal.`,
+        content: `${foodNames}`,
         timestamp: formatISO(new Date())
       };
 
