@@ -17,43 +17,12 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // Food calorie database (simplified)
-    const foodDatabase: Record<string, number> = {
-      'oats': 307,      // per 100g
-      'banana': 105,    // per medium banana
-      'apple': 95,      // per medium apple
-      'rice': 130,      // per 100g cooked
-      'chicken': 165,   // per 100g
-      'egg': 70,        // per large egg
-      'milk': 42,       // per 100ml
-    };
-
-    // Simple food calorie pattern (e.g., "1 banana calorie")
-    const simpleFoodMatch = /(\d+)\s+([a-zA-Z\s]+?)(?:\s+calorie|\s+calories|\s+kcal)?$/i;
-    const simpleMatch = prompt.match(simpleFoodMatch);
-    
-    if (simpleMatch) {
-      const [, amount, foodName] = simpleMatch;
-      const cleanFoodName = foodName.trim().toLowerCase();
-      const baseCalories = foodDatabase[cleanFoodName] || 0;
-      
-      if (baseCalories === 0) {
-        console.log(`Food "${cleanFoodName}" not found in database`);
-      }
-      
-      return JSON.stringify([{
-        name: foodName.trim(),
-        calories: baseCalories * parseInt(amount),
-        serving: `${amount} serving`
-      }]);
-    }
-
-    // Complex food match pattern
-    const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)(?:\s*,\s*|\s+)(?:where\s+)?serving\s+size\s*(?:is\s+)?(\d+)\s*(g|gm|gram)(?:\s+for|\s+has)?\s+(\d+)\s*(?:calorie|kcal|calories)/i;
+    // Food pattern with serving size and calories
+    const foodMatch = /(\d+)\s*(?:g|gm|gram)?\s*(?:of\s+)?([a-zA-Z\s]+)(?:\s*,\s*|\s+)(?:where\s+)?serving\s+size\s*(?:is\s+)?(\d+)\s*(?:g|gm|gram)(?:\s+for|\s+has)?\s+(\d+)\s*(?:calorie|kcal|calories)/i;
     const portionMatch = prompt.match(foodMatch);
 
     if (portionMatch) {
-      const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = portionMatch;
+      const [, totalAmount, foodName, servingSize, caloriesPerServing] = portionMatch;
       const total = parseFloat(totalAmount);
       const serving = parseFloat(servingSize);
       const calsPerServing = parseFloat(caloriesPerServing);
@@ -64,9 +33,40 @@ const generateResponse = async (prompt: string): Promise<string> => {
       return JSON.stringify([{
         name: foodName.trim(),
         calories: totalCalories,
-        serving: `${total}${unit1}`
+        serving: `${total}g`
       }]);
     }
+
+    // Simple food pattern fallback
+    const simpleFoodMatch = /(\d+)\s+([a-zA-Z\s]+?)(?:\s+calorie|\s+calories|\s+kcal)?$/i;
+    const simpleMatch = prompt.match(simpleFoodMatch);
+
+    if (simpleMatch) {
+      const [, amount, foodName] = simpleMatch;
+      const cleanFoodName = foodName.trim().toLowerCase();
+      const baseCalories = foodDatabase[cleanFoodName] || 0;
+
+      if (baseCalories === 0) {
+        console.log(`Food "${cleanFoodName}" not found in database`);
+      }
+
+      return JSON.stringify([{
+        name: foodName.trim(),
+        calories: baseCalories * parseInt(amount),
+        serving: `${amount} serving`
+      }]);
+    }
+
+    // Food calorie database (simplified)
+    const foodDatabase: Record<string, number> = {
+      'oats': 307,      // per 100g
+      'banana': 105,    // per medium banana
+      'apple': 95,      // per medium apple
+      'rice': 130,      // per 100g cooked
+      'chicken': 165,   // per 100g
+      'egg': 70,        // per large egg
+      'milk': 42,       // per 100ml
+    };
 
     const foodItems = [];
     const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
