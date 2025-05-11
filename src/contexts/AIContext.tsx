@@ -84,11 +84,11 @@ const generateResponse = async (prompt: string): Promise<string> => {
     // Extract quantity from the reasoning
     const quantityMatch = aiMessage.reasoning.match(/(\d+)\s*(?:bananas?|apples?|pieces?|servings?)/i);
     const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-    
+
     // Extract base calories (per piece)
     const calorieMatch = aiMessage.reasoning.match(/(\d+)\s*(?:calories|kcal)/i);
     const baseCalories = calorieMatch ? parseInt(calorieMatch[1]) : 0;
-    
+
     // Get food name and clean it
     const foodName = aiMessage.reasoning
       .split('.')[0]
@@ -96,7 +96,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       .replace(/the user asked.*?for/i, '')
       .replace(/\d+\s+/, '')
       .trim();
-    
+
     const content = JSON.stringify([{
       name: foodName,
       calories: baseCalories * quantity,
@@ -182,7 +182,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `I detected: ${foodNames}. Total calories: ${totalCalories} kcal.`,
+        content: `${foodNames}\n${totalCalories} kcal`,
         timestamp: formatISO(new Date())
       };
 
@@ -220,7 +220,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
+        content: `${foodNames}\n${totalCalories} kcal`,
         timestamp: formatISO(new Date())
       };
 
