@@ -27,7 +27,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-r1:free",
