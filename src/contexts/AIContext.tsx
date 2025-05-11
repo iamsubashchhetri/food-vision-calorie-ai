@@ -17,11 +17,17 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
+    const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      console.error('Deepseek API key is missing');
+      throw new Error('API key not configured');
+    }
+
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY || ''}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: "deepseek-chat",
