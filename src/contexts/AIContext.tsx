@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 'use client';
@@ -20,8 +19,8 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-    
+    const API_KEY = 'AIzaSyB_Gk5hI2uCTakqtdtnF-pPjzpp3K1YLBc';
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: {
@@ -50,7 +49,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
-    
+
     const aiResponse = data.candidates[0].content.parts[0].text;
 
     try {
@@ -151,9 +150,9 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       // Convert data URL to base64
       const base64Image = imageUrl.split(',')[1];
-      
-      const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-      
+
+      const API_KEY = 'AIzaSyB_Gk5hI2uCTakqtdtnF-pPjzpp3K1YLBc';
+
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=' + API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -180,7 +179,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const data = await response.json();
       const geminiOutput = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
+
       const geminiResult = await model.generateContent([
         prompt,
         {
@@ -190,7 +189,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           }
         }
       ]);
-      
+
       console.log('Gemini API Response:', geminiOutput);
 
       // Parse the response and extract food items
@@ -200,7 +199,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const jsonMatch = geminiOutput.match(/\[.*\]/s);
         const jsonStr = jsonMatch ? jsonMatch[0] : geminiOutput;
         const parsedItems = JSON.parse(jsonStr);
-        
+
         foodItems = parsedItems.map((item: any) => ({
           id: uuidv4(),
           name: item.name || "Unknown Food",
