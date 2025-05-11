@@ -15,53 +15,35 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-// Cache responses for 5 minutes
-const responseCache = new Map<string, {data: string, timestamp: number}>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const TIMEOUT_DURATION = 15000; // 15 seconds timeout
-
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // Check cache first
-    const cached = responseCache.get(prompt);
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return cached.data;
-    }
-
     const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
     if (!apiKey) {
       console.error('Deepseek API key is missing');
       throw new Error('API key not configured');
     }
 
-    // Create timeout promise
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Request timeout')), TIMEOUT_DURATION);
-    });
-
-    const fetchPromise = fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer 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`,
-        'HTTP-Referer': window.location.origin,
+        'HTTP-Referer': 'https://nutrical.repl.co',
         'X-Title': 'NutriCal AI'
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-r1:free",
         messages: [{
           role: "system",
-          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
+          content: "You are a nutritionist. Respond only with JSON array: [{name: string, calories: number, serving: string}]"
         }, {
           role: "user",
           content: prompt
         }],
-        temperature: 0.3, // Lower temperature for more consistent responses
-        max_tokens: 150 // Limit response length
+        temperature: 0.3,
+        max_tokens: 150
       })
     });
-
-    const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
 
     if (!response.ok) {
       console.error('API Response:', response);
@@ -75,53 +57,52 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-
-    const aiMessage = data.choices[0]?.message;
-    if (!aiMessage?.reasoning) {
+    if (!data.choices?.[0]?.message?.content) {
+      console.error('Invalid API response structure:', data);
+      throw new Error('Invalid API response structure');
+    }
+    
+    // Get response from choices
+    const response = data.choices[0]?.message;
+    if (!response) {
       throw new Error('Invalid API response structure');
     }
 
-    // Extract quantity from the reasoning
-    const quantityMatch = aiMessage.reasoning.match(/(\d+)\s*(?:bananas?|apples?|pieces?|servings?)/i);
-    const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-
-    // Extract base calories (per piece)
-    const calorieMatch = aiMessage.reasoning.match(/(\d+)\s*(?:calories|kcal)/i);
-    const baseCalories = calorieMatch ? parseInt(calorieMatch[1]) : 0;
-
-    // Get food name and clean it
-    const foodName = aiMessage.reasoning
-      .split('.')[0]
-      .replace(/^Okay,?\s*|^I\s*|^Let\s*/i, '')
-      .replace(/the user asked.*?for/i, '')
-      .replace(/\d+\s+/, '')
-      .trim();
-
-    const content = JSON.stringify([{
-      name: foodName,
-      calories: baseCalories * quantity,
-      serving: `${quantity} piece${quantity > 1 ? 's' : ''}`
-    }]);
-
-    try {
-      // Try to parse the response as JSON
-      const parsed = JSON.parse(content);
-
-      // Ensure it's an array of objects with required fields
-      if (Array.isArray(parsed) && parsed.every(item => 
-        typeof item === 'object' && 
-        'name' in item && 
-        'calories' in item && 
-        'serving' in item
-      )) {
-        return content;
-      }
-
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('Invalid JSON response from AI:', content, error);
+    // Check for content in different possible fields
+    const aiResponse = response.content || response.reasoning || '';
+    if (!aiResponse) {
+      throw new Error('Empty response from AI');
     }
 
+    try {
+      // First try to parse the entire response as JSON
+      try {
+        const parsed = JSON.parse(aiResponse);
+        if (Array.isArray(parsed)) {
+          return aiResponse;
+        }
+      } catch {} // Ignore if not pure JSON
+
+      // Then try to extract JSON array from text
+      const jsonMatch = aiResponse.match(/\[\s*{[^]*?}\s*\]/);
+      if (jsonMatch) {
+        const jsonStr = jsonMatch[0].trim();
+        const parsedResponse = JSON.parse(jsonStr);
+        if (Array.isArray(parsedResponse)) {
+          return jsonStr;
+        }
+      }
+
+      // If no valid JSON found, create basic response
+      return JSON.stringify([{
+        name: prompt.trim(),
+        calories: 0,
+        serving: "1 serving"
+      }]);
+    } catch (e) {
+      console.error('Error parsing AI response:', e);
+      throw new Error('Failed to parse AI response');
+    }
 
     // Default response if parsing fails
     return JSON.stringify([{
@@ -182,7 +163,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `${foodNames}\n${totalCalories} kcal`,
+        content: `I detected: ${foodNames}. Total calories: ${totalCalories} kcal.`,
         timestamp: formatISO(new Date())
       };
 
@@ -220,7 +201,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `${foodNames}\n${totalCalories} kcal`,
+        content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
         timestamp: formatISO(new Date())
       };
 
