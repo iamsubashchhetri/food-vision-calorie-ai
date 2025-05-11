@@ -32,10 +32,6 @@ const generateResponse = async (prompt: string): Promise<string> => {
       const totalCalories = Math.round((total / serving) * calsPerServing);
       console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
       
-      // Calculate proportional calories
-      const totalCalories = Math.round((total / serving) * calsPerServing);
-      console.log(`Calculating calories: ${total}g total / ${serving}g serving * ${calsPerServing} calories = ${totalCalories} calories`);
-      
       return JSON.stringify([{
         name: foodName.trim(),
         calories: totalCalories,
