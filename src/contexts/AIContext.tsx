@@ -192,7 +192,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       // Generate mock response
       const mockResponse = await generateMockResponse(text);
-      const result = parseChatGPTResponse(chatGPTResponse);
+      const result = parseChatGPTResponse(mockResponse);
 
       // Construct the response message based on results
       const foodNames = result.map(item => item.name).join(', ');
@@ -239,10 +239,9 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       setMessages(prev => [...prev, userMessage]);
 
-      // Process with ChatGPT API - note this API doesn't support image processing
-      // so we'll send a message saying we're analyzing an image
+      // Process with mock image response
       const mockResponse = await generateMockResponse("mock image");
-      const result = parseChatGPTResponse(chatGPTResponse);
+      const result = parseChatGPTResponse(mockResponse);
 
       // Add imageUrl to the first item
       if (result.length > 0) {
