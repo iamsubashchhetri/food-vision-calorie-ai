@@ -15,20 +15,6 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-// Food calorie database
-const foodDatabase: Record<string, number> = {
-  'pasta': 131,     // per 100g cooked
-  'rice': 130,      // per 100g cooked
-  'oats': 307,      // per 100g
-  'banana': 105,    // per medium banana
-  'apple': 95,      // per medium apple
-  'orange': 62,     // per medium orange
-  'chicken': 165,   // per 100g
-  'egg': 70,        // per large egg
-  'milk': 42,       // per 100ml
-  'bread': 265,     // per 100g
-};
-
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -55,7 +41,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
-    
+
     try {
       // Validate that the response is a valid JSON array
       const parsedResponse = JSON.parse(aiResponse);
@@ -67,52 +53,6 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }
 
     // Default response if parsing fails
-    return JSON.stringify([{
-      name: prompt.trim(),
-      calories: 0,
-      serving: "1 serving"
-    }]);
-
-  } catch (error) {
-    console.error('Error in generateResponse:', error);
-    return JSON.stringify([]);
-  }
-};
-        const serving = parseFloat(servingSize);
-        const calsPerServing = parseFloat(caloriesPerServing);
-        const totalCalories = Math.round((total / serving) * calsPerServing);
-        console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
-
-        return JSON.stringify([{
-          name: foodName.trim(),
-          calories: totalCalories,
-          serving: `${amount}g`
-        }]);
-      }
-    }
-
-    // Simple food quantity pattern (e.g., "2 banana")
-    const simpleFoodMatch = /^(\d+)\s+([a-zA-Z]+)s?$/i;
-    const simpleMatch = prompt.match(simpleFoodMatch);
-
-    if (simpleMatch) {
-      const [, amount, foodName] = simpleMatch;
-      const cleanFoodName = foodName.trim().toLowerCase();
-      const baseCalories = foodDatabase[cleanFoodName] || 0;
-      const totalCalories = baseCalories * parseInt(amount);
-
-      if (baseCalories === 0) {
-        console.log(`Food "${cleanFoodName}" not found in database`);
-      }
-
-      return JSON.stringify([{
-        name: foodName.trim(),
-        calories: totalCalories,
-        serving: `${amount} serving${parseInt(amount) > 1 ? 's' : ''}`
-      }]);
-    }
-
-    // Default response for unrecognized format
     return JSON.stringify([{
       name: prompt.trim(),
       calories: 0,
