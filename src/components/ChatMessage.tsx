@@ -11,6 +11,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
   const formattedTime = format(parseISO(message.timestamp), 'h:mm a');
   
+  // Function to format the message content with proper line breaks
+  const formatContent = (content: string) => {
+    return content.split('\n').map((line, i) => (
+      <React.Fragment key={i}>
+        {line}
+        {i < content.split('\n').length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+  
   return (
     <div className={`flex mb-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div 
@@ -20,7 +30,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-gray-100 text-gray-800 rounded-tl-none'
         }`}
       >
-        <p>{message.content}</p>
+        <p>{formatContent(message.content)}</p>
         <span className={`text-xs mt-1 block ${isUser ? 'text-brand-primary-foreground opacity-80' : 'text-gray-500'}`}>
           {formattedTime}
         </span>
