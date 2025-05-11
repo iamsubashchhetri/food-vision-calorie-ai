@@ -153,7 +153,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const API_KEY = 'AIzaSyB_Gk5hI2uCTakqtdtnF-pPjzpp3K1YLBc';
 
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=' + API_KEY, {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=' + API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,17 +179,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const data = await response.json();
       const geminiOutput = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      const geminiResult = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            mimeType: "image/jpeg",
-            data: base64Image
-          }
-        }
-      ]);
-
+      
       console.log('Gemini API Response:', geminiOutput);
 
       // Parse the response and extract food items
