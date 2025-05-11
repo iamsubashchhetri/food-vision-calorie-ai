@@ -18,19 +18,19 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateMockResponse = async (prompt: string): Promise<string> => {
   const mockResponses = [
     {
-      name: "Banana",
-      calories: 105,
-      serving: "1 medium"
+      name: "Milk",
+      calories: 103,
+      serving: "1 cup"
     },
     {
-      name: "Apple",
+      name: "Bread",
+      calories: 79,
+      serving: "1 slice"
+    },
+    {
+      name: "Peanut Butter",
       calories: 95,
-      serving: "1 medium"
-    },
-    {
-      name: "Orange",
-      calories: 62,
-      serving: "1 medium"
+      serving: "1 tablespoon"
     }
   ];
   
