@@ -18,10 +18,10 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)\s*(?:,|where)?\s*serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)?\s+(\d+)\s+(?:calorie|kcal)/i;
-    const match = prompt.match(foodMatch);
+    const portionMatch = prompt.match(foodMatch);
 
-    if (match) {
-      const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = match;
+    if (portionMatch) {
+      const [, totalAmount, unit1, foodName, servingSize, unit2, caloriesPerServing] = portionMatch;
       const total = parseFloat(totalAmount);
       const serving = parseFloat(servingSize);
       const calsPerServing = parseFloat(caloriesPerServing);
@@ -38,10 +38,10 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
     const foodItems = [];
     const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
-    let match;
+    let patternMatch;
 
-    while ((match = foodPattern.exec(prompt)) !== null) {
-      const itemText = match[1].trim();
+    while ((patternMatch = foodPattern.exec(prompt)) !== null) {
+      const itemText = patternMatch[1].trim();
       const nameMatch = /^(.+?)(?:\n|$)/i.exec(itemText);
       const servingMatch = /(\d+)\s*(?:serving|g|gm|gram)/i.exec(itemText);
       const calorieMatch = /(\d+)\s*(?:kcal|calorie|cal)/i.exec(itemText);
