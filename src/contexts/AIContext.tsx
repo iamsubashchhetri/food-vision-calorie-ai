@@ -20,13 +20,17 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     // Extract serving size calculation from prompt
-    const foodMatch = prompt.match(/(?:i ate|had)\s+([a-zA-Z\s]+)\s+(\d+)\s*(g|gm|gram).*?serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram).*?(\d+)\s+calorie/i);
+    const foodMatch = prompt.match(/i ate\s+([a-zA-Z\s]+)\s+(\d+)\s*(g|gm|gram).*?serving\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram).*?(\d+)\s+calorie/i);
     
     if (foodMatch) {
-      const [, foodName, totalAmount, unit1, servingSize, unit2, calories] = foodMatch;
+      const [, foodName, totalAmount, unit1, servingSize, unit2, caloriesPerServing] = foodMatch;
       const total = parseFloat(totalAmount);
       const serving = parseFloat(servingSize);
-      const calsPerServing = parseFloat(calories);
+      const calsPerServing = parseFloat(caloriesPerServing);
+      
+      // Calculate total calories based on proportion
+      const totalCalories = Math.round((total / serving) * calsPerServing);
+      console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
       
       // Calculate proportional calories
       const totalCalories = Math.round((total / serving) * calsPerServing);
@@ -44,7 +48,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1`
+        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1` 
       },
       body: JSON.stringify({
         model: "deepseek-chat",
