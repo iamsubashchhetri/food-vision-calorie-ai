@@ -17,6 +17,20 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
+    // Simple food calorie pattern (e.g., "1 banana calorie")
+    const simpleFoodMatch = /(\d+)\s+([a-zA-Z\s]+?)(?:\s+calorie|\s+calories|\s+kcal)?$/i;
+    const simpleMatch = prompt.match(simpleFoodMatch);
+    
+    if (simpleMatch) {
+      const [, amount, foodName] = simpleMatch;
+      return JSON.stringify([{
+        name: foodName.trim(),
+        calories: 105, // Default calories for a banana
+        serving: `${amount} serving`
+      }]);
+    }
+
+    // Complex food match pattern
     const foodMatch = /(\d+)\s*(g|gm|gram)\s*(?:of\s+)?([a-zA-Z\s]+)(?:\s*,\s*|\s+)(?:where\s+)?serving\s+size\s*(?:is\s+)?(\d+)\s*(g|gm|gram)(?:\s+for|\s+has)?\s+(\d+)\s*(?:calorie|kcal|calories)/i;
     const portionMatch = prompt.match(foodMatch);
 
