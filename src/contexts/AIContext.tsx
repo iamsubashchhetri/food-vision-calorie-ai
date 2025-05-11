@@ -37,14 +37,25 @@ const generateResponse = async (prompt: string): Promise<string> => {
       }]);
     }
 
-    // Simple food pattern fallback
-    const simpleFoodMatch = /(\d+)\s+([a-zA-Z\s]+?)(?:\s+calorie|\s+calories|\s+kcal)?$/i;
+    // Simple food calorie pattern (e.g., "2 banana")
+    const simpleFoodMatch = /^(\d+)\s+([a-zA-Z]+)s?$/i;
     const simpleMatch = prompt.match(simpleFoodMatch);
 
     if (simpleMatch) {
       const [, amount, foodName] = simpleMatch;
       const cleanFoodName = foodName.trim().toLowerCase();
+
+      // Food calorie database (per serving)
+      const foodDatabase: Record<string, number> = {
+        'banana': 105,    // per medium banana
+        'apple': 95,      // per medium apple
+        'orange': 62,     // per medium orange
+        'egg': 70,        // per large egg
+        'oat': 307,      // per 100g
+      };
+
       const baseCalories = foodDatabase[cleanFoodName] || 0;
+      const totalCalories = baseCalories * parseInt(amount);
 
       if (baseCalories === 0) {
         console.log(`Food "${cleanFoodName}" not found in database`);
@@ -52,8 +63,8 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
       return JSON.stringify([{
         name: foodName.trim(),
-        calories: baseCalories * parseInt(amount),
-        serving: `${amount} serving`
+        calories: totalCalories,
+        serving: `${amount} serving${amount > 1 ? 's' : ''}`
       }]);
     }
 
