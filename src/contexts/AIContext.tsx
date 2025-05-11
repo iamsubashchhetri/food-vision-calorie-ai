@@ -12,6 +12,9 @@ interface AIContextType {
   clearMessages: () => void;
 }
 
+// Create the context
+const AIContext = createContext<AIContextType | undefined>(undefined);
+
 // Function to process text with ChatGPT API via RapidAPI
 const processChatGPT = async (prompt: string): Promise<string> => {
   try {
@@ -262,7 +265,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setMessages([]);
   };
 
-  const value = {
+  const value: AIContextType = {
     messages,
     isProcessing,
     processTextInput,
