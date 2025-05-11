@@ -31,9 +31,33 @@ const foodDatabase: Record<string, number> = {
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // Extract detailed food quantity pattern
+    // First try to match detailed pattern with serving size and calories
     const foodMatch = /(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*\((?:serving size|per serving)?\s*(\d+)\s*(?:g|gm|gram)s?\s*(?:=|is)?\s*(\d+)\s*(?:kcal|calorie|cal)\))?/i;
     const portionMatch = prompt.match(foodMatch);
+
+    // Try to extract food items and quantities
+    const items = prompt.toLowerCase().match(/(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)/g);
+    if (items) {
+      const foodItems = [];
+      for (const item of items) {
+        const [, amount, foodName] = item.match(/(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)/i) || [];
+        if (amount && foodName) {
+          const cleanFoodName = foodName.trim().toLowerCase();
+          if (foodDatabase[cleanFoodName]) {
+            const grams = parseInt(amount);
+            const calories = Math.round((grams / 100) * foodDatabase[cleanFoodName]);
+            foodItems.push({
+              name: cleanFoodName,
+              calories: calories,
+              serving: `${grams}g`
+            });
+          }
+        }
+      }
+      if (foodItems.length > 0) {
+        return JSON.stringify(foodItems);
+      }
+    }
 
     if (portionMatch) {
       const [, amount, foodName, servingSize, caloriesPerServing] = portionMatch;
