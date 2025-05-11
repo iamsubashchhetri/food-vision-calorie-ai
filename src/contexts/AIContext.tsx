@@ -236,4 +236,3 @@ export const useAI = (): AIContextType => {
   }
   return context;
 };
-```
