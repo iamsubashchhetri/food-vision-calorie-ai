@@ -1,0 +1,25 @@
+The above error occurred in the <ChatMessage> component:
+
+    at ChatMessage (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/src/components/ChatMessage.tsx:12:24)
+    at div
+    at div
+    at main
+    at div
+    at Layout (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/src/components/Layout.tsx:14:19)
+    at ChatPage (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/src/pages/ChatPage.tsx:23:58)
+    at RenderedRoute (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=078d3472:4069:5)
+    at Routes (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=078d3472:4508:5)
+    at Router (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=078d3472:4451:15)
+    at BrowserRouter (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=078d3472:5196:5)
+    at AIProvider (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/src/contexts/AIContext.tsx:183:30)
+    at FoodLogProvider (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/src/contexts/FoodLogContext.tsx:15:35)
+    at Provider (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/chunk-5H2P4PG6.js?v=078d3472:58:15)
+    at TooltipProvider (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=078d3472:56:5)
+    at QueryClientProvider (https://0c0621d8-a1a8-4720-970f-38c88f0522a7-00-1vi5800p0yphp.kirk.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=078d3472:2794:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+content is not defined
+Error processing text: 
+ReferenceError {}
