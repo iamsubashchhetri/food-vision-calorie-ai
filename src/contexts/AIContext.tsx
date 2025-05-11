@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState } from 'react';
 import { FoodItem, Message } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +16,7 @@ interface AIContextType {
 // Create the context
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-// Function to generate mock responses
+// Function to generate responses
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -113,34 +115,28 @@ const generateResponse = async (prompt: string): Promise<string> => {
     calories: 100,
     serving: "1 serving"
   }]);
+  }
 };
 
-// Parse the ChatGPT response to extract food items and calories
+// Parse the response to extract food items and calories
 const parseChatGPTResponse = (responseText: string): FoodItem[] => {
   try {
     console.log("Parsing response:", responseText);
-
-    // Try to extract JSON if it exists in the response
     const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/) || 
                       responseText.match(/\[\s*\{[\s\S]*?\}\s*\]/) ||
                       responseText.match(/{[\s\S]*?}/);
 
     let jsonText = jsonMatch ? jsonMatch[0] : responseText;
-
-    // Clean up the string if it's not already valid JSON
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\s*|\s*```/g, '');
     }
 
     console.log("Extracted JSON text:", jsonText);
-
-    // Try to find JSON array in the text
     const arrayMatch = jsonText.match(/\[\s*\{[\s\S]*?\}\s*\]/);
     if (arrayMatch) {
       jsonText = arrayMatch[0];
     }
 
-    // Try to parse as an array first
     try {
       const parsedArray = JSON.parse(jsonText);
       console.log("Parsed as array:", parsedArray);
@@ -158,7 +154,6 @@ const parseChatGPTResponse = (responseText: string): FoodItem[] => {
       // Not an array, continue to try other formats
     }
 
-    // Try to parse as an object with foods property
     try {
       const parsed = JSON.parse(jsonText);
       console.log("Parsed as object:", parsed);
@@ -171,7 +166,6 @@ const parseChatGPTResponse = (responseText: string): FoodItem[] => {
           serving: item.serving || "1 serving"
         }));
       } else if (parsed && !Array.isArray(parsed)) {
-        // Single food item
         return [{
           id: uuidv4(),
           name: parsed.name || parsed.food || "Unknown food",
@@ -257,8 +251,6 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const processTextInput = async (text: string): Promise<FoodItem[]> => {
     try {
       setIsProcessing(true);
-
-      // Add user message
       const userMessage: Message = {
         id: uuidv4(),
         role: 'user',
@@ -267,12 +259,9 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, userMessage]);
-
-      // Generate mock response
       const mockResponse = await generateResponse(text);
       const result = parseChatGPTResponse(mockResponse);
 
-      // Construct the response message based on results
       const foodNames = result.map(item => item.name).join(', ');
       const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
 
@@ -287,8 +276,6 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return result;
     } catch (error) {
       console.error('Error processing text:', error);
-
-      // Add error message
       const errorMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
@@ -306,8 +293,6 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const processImage = async (imageUrl: string): Promise<FoodItem[]> => {
     try {
       setIsProcessing(true);
-
-      // Add user message with image
       const userMessage: Message = {
         id: uuidv4(),
         role: 'user',
@@ -316,17 +301,13 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, userMessage]);
-
-      // Process with mock image response
-      const mockResponse = await generateMockResponse("mock image");
+      const mockResponse = await generateResponse("mock image");
       const result = parseChatGPTResponse(mockResponse);
 
-      // Add imageUrl to the first item
       if (result.length > 0) {
         result[0].imageUrl = imageUrl;
       }
 
-      // Construct the response message based on results
       const foodNames = result.map(item => item.name).join(', ');
       const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
 
@@ -341,8 +322,6 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return result;
     } catch (error) {
       console.error('Error processing image:', error);
-
-      // Add error message
       const errorMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
