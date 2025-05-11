@@ -75,31 +75,33 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    if (!data.choices?.[0]?.message) {
-      console.error('Invalid API response structure:', data);
+
+    const response = data.choices[0]?.message;
+    if (!response?.content) {
       throw new Error('Invalid API response structure');
     }
-    
-    const aiResponse = data.choices[0].message.content || data.choices[0].message.reasoning || '';
-    
-    // Cache successful response
-    if (aiResponse) {
-      responseCache.set(prompt, {
-        data: aiResponse,
-        timestamp: Date.now()
-      });
-    }
+
+    const content = response.content.trim();
 
     try {
-      // Remove markdown code block if present
-      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
-      const parsedResponse = JSON.parse(jsonStr);
-      if (Array.isArray(parsedResponse)) {
-        return jsonStr;
+      // Try to parse the response as JSON
+      const parsed = JSON.parse(content);
+
+      // Ensure it's an array of objects with required fields
+      if (Array.isArray(parsed) && parsed.every(item => 
+        typeof item === 'object' && 
+        'name' in item && 
+        'calories' in item && 
+        'serving' in item
+      )) {
+        return content;
       }
-    } catch (e) {
-      console.error('Invalid JSON response from AI:', aiResponse);
+
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error('Invalid JSON response from AI:', content, error);
     }
+
 
     // Default response if parsing fails
     return JSON.stringify([{
@@ -234,3 +236,4 @@ export const useAI = (): AIContextType => {
   }
   return context;
 };
+```
