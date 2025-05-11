@@ -21,7 +21,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const API_KEY = 'AIzaSyB_Gk5hI2uCTakqtdtnF-pPjzpp3K1YLBc';
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -153,7 +153,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const API_KEY = 'AIzaSyB_Gk5hI2uCTakqtdtnF-pPjzpp3K1YLBc';
 
-      const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=' + API_KEY, {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent?key=' + API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
