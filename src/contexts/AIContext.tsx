@@ -19,6 +19,26 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 // Function to generate responses
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
+    // Extract serving size calculation from prompt
+    const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram)\s+(?:of\s+)?([a-zA-Z\s]+)\s*,?\s*(?:serving|where)\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)\s+(\d+)\s+calorie/i);
+    
+    if (foodMatch) {
+      const [, totalAmount, unit1, foodName, servingSize, unit2, calories] = foodMatch;
+      const total = parseFloat(totalAmount);
+      const serving = parseFloat(servingSize);
+      const calsPerServing = parseFloat(calories);
+      
+      // Calculate proportional calories
+      const totalCalories = Math.round((total / serving) * calsPerServing);
+      
+      return JSON.stringify([{
+        name: foodName.trim(),
+        calories: totalCalories,
+        serving: `${total}${unit1}`
+      }]);
+    }
+    
+    // If no serving size calculation needed, use Deepseek API
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
