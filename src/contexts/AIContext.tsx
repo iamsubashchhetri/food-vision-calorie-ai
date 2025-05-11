@@ -17,38 +17,60 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1`
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [
-          {
-            role: "system",
-            content: "You are a food analysis assistant. Analyze food descriptions and return calorie information in JSON format: [{name: string, calories: number, serving: string}]"
-          },
-          {
-            role: "user",
-            content: `Analyze this food description and calculate calories: ${prompt}`
-          }
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Deepseek API error:', errorData);
-      throw new Error(`Deepseek API error: ${response.status}`);
+    // Extract basic food quantity patterns first
+    const foodMatch = /(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*\((?:serving size|per serving)?\s*(\d+)\s*(?:g|gm|gram)s?\s*(?:=|is)?\s*(\d+)\s*(?:kcal|calorie|cal)\))?/i;
+    const portionMatch = prompt.match(foodMatch);
+    
+    if (portionMatch) {
+      const [, amount, foodName, servingSize, caloriesPerServing] = portionMatch;
+      if (servingSize && caloriesPerServing) {
+        const total = parseFloat(amount);
+        const serving = parseFloat(servingSize);
+        const calsPerServing = parseFloat(caloriesPerServing);
+        const totalCalories = Math.round((total / serving) * calsPerServing);
+        
+        return JSON.stringify([{
+          name: foodName.trim(),
+          calories: totalCalories,
+          serving: `${amount}g`
+        }]);
+      }
     }
 
-    const data = await response.json();
-    if (!data.choices?.[0]?.message?.content) {
-      throw new Error('Invalid response format from Deepseek API');
+    // Fallback to basic food database
+    const foodDatabase: Record<string, number> = {
+      'pasta': 131,     // per 100g cooked
+      'rice': 130,      // per 100g cooked
+      'oats': 307,      // per 100g
+      'banana': 105,    // per medium banana
+      'apple': 95,      // per medium apple
+      'chicken': 165,   // per 100g
+      'egg': 70,        // per large egg
+      'milk': 42,       // per 100ml
+      'bread': 265,     // per 100g
+    };
+
+    // Try to match basic quantities
+    const simpleMatch = /(\d+)\s+([a-zA-Z\s]+)s?/i.exec(prompt);
+    if (simpleMatch) {
+      const [, quantity, foodName] = simpleMatch;
+      const cleanFoodName = foodName.trim().toLowerCase();
+      const calories = foodDatabase[cleanFoodName];
+      
+      if (calories) {
+        return JSON.stringify([{
+          name: cleanFoodName,
+          calories: calories * parseInt(quantity),
+          serving: `${quantity} serving${parseInt(quantity) > 1 ? 's' : ''}`
+        }]);
+      }
     }
-    return data.choices[0].message.content;
+
+    return JSON.stringify([{
+      name: prompt.trim(),
+      calories: 0,
+      serving: "1 serving"
+    }]);
     const portionMatch = prompt.match(foodMatch);
 
     if (portionMatch) {
