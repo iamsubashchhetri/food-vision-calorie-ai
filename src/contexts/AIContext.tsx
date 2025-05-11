@@ -1,3 +1,6 @@
+
+import { GoogleGenAI } from "@google/genai";
+
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -150,31 +153,24 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const base64Image = imageUrl.split(',')[1];
       
       const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-      const response = await fetch(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent',
+      const genAI = new GoogleGenAI({ apiKey: API_KEY });
+      
+      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+      
+      const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+      
+      const result = await model.generateContent([
+        prompt,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': API_KEY
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                {
-                  text: "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions."
-                },
-                {
-                  inlineData: {
-                    mimeType: "image/jpeg",
-                    data: base64Image
-                  }
-                }
-              ]
-            }]
-          })
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Image
+          }
         }
+      ]);
+      
+      const response = await result.response;
+      const aiResponse = response.text();
       );
 
       if (!response.ok) {
