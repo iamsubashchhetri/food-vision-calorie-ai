@@ -27,17 +27,21 @@ const generateResponse = async (prompt: string): Promise<string> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`
+        'Authorization': `Bearer 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`,
+        'HTTP-Referer': 'https://nutrical.repl.co',
+        'X-Title': 'NutriCal AI'
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-r1:free",
         messages: [{
           role: "system",
-          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
+          content: "You are a nutritionist. Respond only with JSON array: [{name: string, calories: number, serving: string}]"
         }, {
           role: "user",
           content: prompt
-        }]
+        }],
+        temperature: 0.3,
+        max_tokens: 150
       })
     });
 
