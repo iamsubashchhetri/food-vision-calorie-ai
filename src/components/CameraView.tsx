@@ -50,7 +50,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const imageUrl = canvas.toDataURL('image/jpeg');
         setCapturedImageUrl(imageUrl);
         stopCamera();
         onCapture(imageUrl);

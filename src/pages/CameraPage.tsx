@@ -90,24 +90,13 @@ const CameraPage: React.FC = () => {
                 <span className="font-medium">Take Photo</span>
               </button>
               
-              <label 
-                className="ios-card flex flex-col items-center py-8 cursor-pointer"
+              <button 
+                onClick={handleOpenCamera} // In a real app this would open gallery
+                className="ios-card flex flex-col items-center py-8"
               >
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const imageUrl = URL.createObjectURL(file);
-                      handleCapturePhoto(imageUrl);
-                    }
-                  }}
-                />
                 <ImageIcon size={40} className="text-brand-primary mb-3" />
                 <span className="font-medium">Upload Image</span>
-              </label>
+              </button>
             </div>
           </div>
         )}
