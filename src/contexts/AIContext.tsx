@@ -43,7 +43,13 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
     if (!response.ok) {
       console.error('API Response:', response);
-      throw new Error(`Deepseek API error: ${response.status}`);
+      if (response.status === 402) {
+        throw new Error('Deepseek API subscription required or payment needed');
+      } else if (response.status === 401) {
+        throw new Error('Invalid API key or authentication failed');
+      } else {
+        throw new Error(`Deepseek API error: ${response.status}`);
+      }
     }
 
     const data = await response.json();
