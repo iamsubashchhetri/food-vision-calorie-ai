@@ -23,20 +23,16 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1:free",
-        messages: [{
-          role: "system",
-          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
-        }, {
-          role: "user",
-          content: prompt
+        contents: [{
+          parts: [{
+            text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]. Food to analyze: ${prompt}`
+          }]
         }]
       })
     });
@@ -53,12 +49,12 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    if (!data.choices?.[0]?.message?.content) {
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
     
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.candidates[0].content.parts[0].text;
 
     try {
       // Remove markdown code block if present
