@@ -15,12 +15,26 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
+// Food calorie database
+const foodDatabase: Record<string, number> = {
+  'pasta': 131,     // per 100g cooked
+  'rice': 130,      // per 100g cooked
+  'oats': 307,      // per 100g
+  'banana': 105,    // per medium banana
+  'apple': 95,      // per medium apple
+  'orange': 62,     // per medium orange
+  'chicken': 165,   // per 100g
+  'egg': 70,        // per large egg
+  'milk': 42,       // per 100ml
+  'bread': 265,     // per 100g
+};
+
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // Extract basic food quantity patterns first
+    // Extract detailed food quantity pattern
     const foodMatch = /(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*\((?:serving size|per serving)?\s*(\d+)\s*(?:g|gm|gram)s?\s*(?:=|is)?\s*(\d+)\s*(?:kcal|calorie|cal)\))?/i;
     const portionMatch = prompt.match(foodMatch);
-    
+
     if (portionMatch) {
       const [, amount, foodName, servingSize, caloriesPerServing] = portionMatch;
       if (servingSize && caloriesPerServing) {
@@ -28,7 +42,8 @@ const generateResponse = async (prompt: string): Promise<string> => {
         const serving = parseFloat(servingSize);
         const calsPerServing = parseFloat(caloriesPerServing);
         const totalCalories = Math.round((total / serving) * calsPerServing);
-        
+        console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
+
         return JSON.stringify([{
           name: foodName.trim(),
           calories: totalCalories,
@@ -37,75 +52,13 @@ const generateResponse = async (prompt: string): Promise<string> => {
       }
     }
 
-    // Fallback to basic food database
-    const foodDatabase: Record<string, number> = {
-      'pasta': 131,     // per 100g cooked
-      'rice': 130,      // per 100g cooked
-      'oats': 307,      // per 100g
-      'banana': 105,    // per medium banana
-      'apple': 95,      // per medium apple
-      'chicken': 165,   // per 100g
-      'egg': 70,        // per large egg
-      'milk': 42,       // per 100ml
-      'bread': 265,     // per 100g
-    };
-
-    // Try to match basic quantities
-    const simpleMatch = /(\d+)\s+([a-zA-Z\s]+)s?/i.exec(prompt);
-    if (simpleMatch) {
-      const [, quantity, foodName] = simpleMatch;
-      const cleanFoodName = foodName.trim().toLowerCase();
-      const calories = foodDatabase[cleanFoodName];
-      
-      if (calories) {
-        return JSON.stringify([{
-          name: cleanFoodName,
-          calories: calories * parseInt(quantity),
-          serving: `${quantity} serving${parseInt(quantity) > 1 ? 's' : ''}`
-        }]);
-      }
-    }
-
-    return JSON.stringify([{
-      name: prompt.trim(),
-      calories: 0,
-      serving: "1 serving"
-    }]);
-    const portionMatch = prompt.match(foodMatch);
-
-    if (portionMatch) {
-      const [, totalAmount, foodName, servingSize, caloriesPerServing] = portionMatch;
-      const total = parseFloat(totalAmount);
-      const serving = parseFloat(servingSize);
-      const calsPerServing = parseFloat(caloriesPerServing);
-
-      const totalCalories = Math.round((total / serving) * calsPerServing);
-      console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
-
-      return JSON.stringify([{
-        name: foodName.trim(),
-        calories: totalCalories,
-        serving: `${total}g`
-      }]);
-    }
-
-    // Simple food calorie pattern (e.g., "2 banana")
+    // Simple food quantity pattern (e.g., "2 banana")
     const simpleFoodMatch = /^(\d+)\s+([a-zA-Z]+)s?$/i;
     const simpleMatch = prompt.match(simpleFoodMatch);
 
     if (simpleMatch) {
       const [, amount, foodName] = simpleMatch;
       const cleanFoodName = foodName.trim().toLowerCase();
-
-      // Food calorie database (per serving)
-      const foodDatabase: Record<string, number> = {
-        'banana': 105,    // per medium banana
-        'apple': 95,      // per medium apple
-        'orange': 62,     // per medium orange
-        'egg': 70,        // per large egg
-        'oat': 307,      // per 100g
-      };
-
       const baseCalories = foodDatabase[cleanFoodName] || 0;
       const totalCalories = baseCalories * parseInt(amount);
 
@@ -116,41 +69,17 @@ const generateResponse = async (prompt: string): Promise<string> => {
       return JSON.stringify([{
         name: foodName.trim(),
         calories: totalCalories,
-        serving: `${amount} serving${amount > 1 ? 's' : ''}`
+        serving: `${amount} serving${parseInt(amount) > 1 ? 's' : ''}`
       }]);
     }
 
-    // Food calorie database (simplified)
-    const foodDatabase: Record<string, number> = {
-      'oats': 307,      // per 100g
-      'banana': 105,    // per medium banana
-      'apple': 95,      // per medium apple
-      'rice': 130,      // per 100g cooked
-      'chicken': 165,   // per 100g
-      'egg': 70,        // per large egg
-      'milk': 42,       // per 100ml
-    };
+    // Default response for unrecognized format
+    return JSON.stringify([{
+      name: prompt.trim(),
+      calories: 0,
+      serving: "1 serving"
+    }]);
 
-    const foodItems = [];
-    const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
-    let patternMatch;
-
-    while ((patternMatch = foodPattern.exec(prompt)) !== null) {
-      const itemText = patternMatch[1].trim();
-      const nameMatch = /^(.+?)(?:\n|$)/i.exec(itemText);
-      const servingMatch = /(\d+)\s*(?:serving|g|gm|gram)/i.exec(itemText);
-      const calorieMatch = /(\d+)\s*(?:kcal|calorie|cal)/i.exec(itemText);
-
-      if (nameMatch && calorieMatch) {
-        foodItems.push({
-          name: nameMatch[1].trim(),
-          calories: parseInt(calorieMatch[1]),
-          serving: servingMatch ? servingMatch[0] : "1 serving"
-        });
-      }
-    }
-
-    return JSON.stringify(foodItems);
   } catch (error) {
     console.error('Error in generateResponse:', error);
     return JSON.stringify([]);
