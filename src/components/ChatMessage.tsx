@@ -14,10 +14,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   // Function to format the message content with proper line breaks
   const formatContent = (content: string) => {
     return content.split('\n').map((line, i) => (
-      <React.Fragment key={i}>
+      <span key={i} className="block">
         {line}
-        {i < content.split('\n').length - 1 && <br />}
-      </React.Fragment>
+      </span>
     ));
   };
   
