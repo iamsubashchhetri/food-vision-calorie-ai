@@ -171,9 +171,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       
       const response = await result.response;
       const aiResponse = response.text();
-      );
 
-      if (!response.ok) {
+      if (!aiResponse) {
         throw new Error(`Gemini API request failed: ${response.statusText}`);
       }
 
