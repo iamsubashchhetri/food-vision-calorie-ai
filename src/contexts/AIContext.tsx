@@ -77,11 +77,20 @@ const generateResponse = async (prompt: string): Promise<string> => {
     const data = await response.json();
 
     const aiMessage = data.choices[0]?.message;
-    if (!aiMessage?.content) {
+    if (!aiMessage?.reasoning) {
       throw new Error('Invalid API response structure');
     }
 
-    const content = aiMessage.content.trim();
+    // Force JSON response format by extracting reasoning and converting to JSON
+    const items = aiMessage.reasoning.match(/(\d+)\s*(?:calories|kcal)/gi);
+    const calories = items ? parseInt(items[0]) : 0;
+    const foodName = aiMessage.reasoning.split('.')[0].replace(/^Okay,?\s*|^I\s*|^Let\s*/i, '').trim();
+    
+    const content = JSON.stringify([{
+      name: foodName,
+      calories: calories,
+      serving: "1 serving"
+    }]);
 
     try {
       // Try to parse the response as JSON
