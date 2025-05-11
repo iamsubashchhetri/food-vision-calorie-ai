@@ -15,19 +15,37 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
+// Cache responses for 5 minutes
+const responseCache = new Map<string, {data: string, timestamp: number}>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const TIMEOUT_DURATION = 15000; // 15 seconds timeout
+
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
+    // Check cache first
+    const cached = responseCache.get(prompt);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+
     const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
     if (!apiKey) {
       console.error('Deepseek API key is missing');
       throw new Error('API key not configured');
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Create timeout promise
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout')), TIMEOUT_DURATION);
+    });
+
+    const fetchPromise = fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`
+        'Authorization': `Bearer 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`,
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'NutriCal AI'
       },
       body: JSON.stringify({
         model: "deepseek/deepseek-r1:free",
@@ -37,9 +55,13 @@ const generateResponse = async (prompt: string): Promise<string> => {
         }, {
           role: "user",
           content: prompt
-        }]
+        }],
+        temperature: 0.3, // Lower temperature for more consistent responses
+        max_tokens: 150 // Limit response length
       })
     });
+
+    const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
 
     if (!response.ok) {
       console.error('API Response:', response);
@@ -53,12 +75,20 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }
 
     const data = await response.json();
-    if (!data.choices?.[0]?.message?.content) {
+    if (!data.choices?.[0]?.message) {
       console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
     
-    const aiResponse = data.choices[0].message.content;
+    const aiResponse = data.choices[0].message.content || data.choices[0].message.reasoning || '';
+    
+    // Cache successful response
+    if (aiResponse) {
+      responseCache.set(prompt, {
+        data: aiResponse,
+        timestamp: Date.now()
+      });
+    }
 
     try {
       // Remove markdown code block if present
