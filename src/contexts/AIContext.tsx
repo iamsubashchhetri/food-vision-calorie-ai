@@ -64,9 +64,15 @@ const generateResponse = async (prompt: string): Promise<string> => {
       }
     } catch (e) {
       console.error('Invalid JSON response from AI:', aiResponse);
+      throw new Error('Failed to parse AI response');
     }
 
-    if (portionMatch) {
+    // Default response if parsing fails
+    return JSON.stringify([{
+      name: prompt.trim(),
+      calories: 0,
+      serving: "1 serving"
+    }]);
       const [, amount, foodName, servingSize, caloriesPerServing] = portionMatch;
       if (servingSize && caloriesPerServing) {
         const total = parseFloat(amount);
