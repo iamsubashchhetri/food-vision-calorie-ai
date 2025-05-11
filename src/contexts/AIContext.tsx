@@ -15,9 +15,37 @@ interface AIContextType {
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
 // Function to generate mock responses
-const generateMockResponse = async (prompt: string): Promise<string> => {
-  // Parse user input for food with serving size and calories
-  const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:of\s+)?([a-zA-Z\s]+)\s+where\s+(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:serving\s+size\s+)?has\s+(\d+)\s+calorie/i);
+const generateResponse = async (prompt: string): Promise<string> => {
+  try {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [{
+          role: "system",
+          content: "You are a nutrition expert. Extract food items, quantities, and calculate calories. Return response in JSON format."
+        }, {
+          role: "user",
+          content: prompt
+        }],
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error('Error calling Deepseek API:', error);
+    // Fallback to regex parsing if API fails
+    const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:of\s+)?([a-zA-Z\s]+)\s+where\s+(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:serving\s+size\s+)?has\s+(\d+)\s+calorie/i);
   
   if (foodMatch) {
     const [, quantity, unit, foodName, servingSize, servingUnit, calories] = foodMatch;
@@ -241,7 +269,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       setMessages(prev => [...prev, userMessage]);
 
       // Generate mock response
-      const mockResponse = await generateMockResponse(text);
+      const mockResponse = await generateResponse(text);
       const result = parseChatGPTResponse(mockResponse);
 
       // Construct the response message based on results
