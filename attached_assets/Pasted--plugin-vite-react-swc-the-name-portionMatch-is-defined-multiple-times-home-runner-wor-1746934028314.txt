@@ -1,0 +1,224 @@
+[plugin:vite:react-swc] × the name `portionMatch` is defined multiple times
+    ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:22:1]
+ 19 │   try {
+ 20 │     // Extract basic food quantity patterns first
+ 21 │     const foodMatch = /(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*\((?:serving size|per serving)?\s*(\d+)\s*(?:g|gm|gram)s?\s*(?:=|is)?\s*(\d+)\s*(?:kcal|calorie|cal)\))?/i;
+ 22 │     const portionMatch = prompt.match(foodMatch);
+    ·           ──────┬─────
+    ·                 ╰── previous definition of `portionMatch` here
+ 23 │     
+ 24 │     if (portionMatch) {
+ 25 │       const [, amount, foodName, servingSize, caloriesPerServing] = portionMatch;
+ 26 │       if (servingSize && caloriesPerServing) {
+ 27 │         const total = parseFloat(amount);
+ 28 │         const serving = parseFloat(servingSize);
+ 29 │         const calsPerServing = parseFloat(caloriesPerServing);
+ 30 │         const totalCalories = Math.round((total / serving) * calsPerServing);
+ 31 │         
+ 32 │         return JSON.stringify([{
+ 33 │           name: foodName.trim(),
+ 34 │           calories: totalCalories,
+ 35 │           serving: `${amount}g`
+ 36 │         }]);
+ 37 │       }
+ 38 │     }
+ 39 │ 
+ 40 │     // Fallback to basic food database
+ 41 │     const foodDatabase: Record<string, number> = {
+ 42 │       'pasta': 131,     // per 100g cooked
+ 43 │       'rice': 130,      // per 100g cooked
+ 44 │       'oats': 307,      // per 100g
+ 45 │       'banana': 105,    // per medium banana
+ 46 │       'apple': 95,      // per medium apple
+ 47 │       'chicken': 165,   // per 100g
+ 48 │       'egg': 70,        // per large egg
+ 49 │       'milk': 42,       // per 100ml
+ 50 │       'bread': 265,     // per 100g
+ 51 │     };
+ 52 │ 
+ 53 │     // Try to match basic quantities
+ 54 │     const simpleMatch = /(\d+)\s+([a-zA-Z\s]+)s?/i.exec(prompt);
+ 55 │     if (simpleMatch) {
+ 56 │       const [, quantity, foodName] = simpleMatch;
+ 57 │       const cleanFoodName = foodName.trim().toLowerCase();
+ 58 │       const calories = foodDatabase[cleanFoodName];
+ 59 │       
+ 60 │       if (calories) {
+ 61 │         return JSON.stringify([{
+ 62 │           name: cleanFoodName,
+ 63 │           calories: calories * parseInt(quantity),
+ 64 │           serving: `${quantity} serving${parseInt(quantity) > 1 ? 's' : ''}`
+ 65 │         }]);
+ 66 │       }
+ 67 │     }
+ 68 │ 
+ 69 │     return JSON.stringify([{
+ 70 │       name: prompt.trim(),
+ 71 │       calories: 0,
+ 72 │       serving: "1 serving"
+ 73 │     }]);
+ 74 │     const portionMatch = prompt.match(foodMatch);
+    ·           ──────┬─────
+    ·                 ╰── `portionMatch` redefined here
+ 75 │ 
+ 76 │     if (portionMatch) {
+ 77 │       const [, totalAmount, foodName, servingSize, caloriesPerServing] = portionMatch;
+    ╰────
+  × the name `simpleMatch` is defined multiple times
+    ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:54:1]
+ 51 │     };
+ 52 │ 
+ 53 │     // Try to match basic quantities
+ 54 │     const simpleMatch = /(\d+)\s+([a-zA-Z\s]+)s?/i.exec(prompt);
+    ·           ─────┬─────
+    ·                ╰── previous definition of `simpleMatch` here
+ 55 │     if (simpleMatch) {
+ 56 │       const [, quantity, foodName] = simpleMatch;
+ 57 │       const cleanFoodName = foodName.trim().toLowerCase();
+ 58 │       const calories = foodDatabase[cleanFoodName];
+ 59 │       
+ 60 │       if (calories) {
+ 61 │         return JSON.stringify([{
+ 62 │           name: cleanFoodName,
+ 63 │           calories: calories * parseInt(quantity),
+ 64 │           serving: `${quantity} serving${parseInt(quantity) > 1 ? 's' : ''}`
+ 65 │         }]);
+ 66 │       }
+ 67 │     }
+ 68 │ 
+ 69 │     return JSON.stringify([{
+ 70 │       name: prompt.trim(),
+ 71 │       calories: 0,
+ 72 │       serving: "1 serving"
+ 73 │     }]);
+ 74 │     const portionMatch = prompt.match(foodMatch);
+ 75 │ 
+ 76 │     if (portionMatch) {
+ 77 │       const [, totalAmount, foodName, servingSize, caloriesPerServing] = portionMatch;
+ 78 │       const total = parseFloat(totalAmount);
+ 79 │       const serving = parseFloat(servingSize);
+ 80 │       const calsPerServing = parseFloat(caloriesPerServing);
+ 81 │ 
+ 82 │       const totalCalories = Math.round((total / serving) * calsPerServing);
+ 83 │       console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
+ 84 │ 
+ 85 │       return JSON.stringify([{
+ 86 │         name: foodName.trim(),
+ 87 │         calories: totalCalories,
+ 88 │         serving: `${total}g`
+ 89 │       }]);
+ 90 │     }
+ 91 │ 
+ 92 │     // Simple food calorie pattern (e.g., "2 banana")
+ 93 │     const simpleFoodMatch = /^(\d+)\s+([a-zA-Z]+)s?$/i;
+ 94 │     const simpleMatch = prompt.match(simpleFoodMatch);
+    ·           ─────┬─────
+    ·                ╰── `simpleMatch` redefined here
+ 95 │ 
+ 96 │     if (simpleMatch) {
+ 97 │       const [, amount, foodName] = simpleMatch;
+    ╰────
+  × the name `foodDatabase` is defined multiple times
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:41:1]
+  38 │     }
+  39 │ 
+  40 │     // Fallback to basic food database
+  41 │     const foodDatabase: Record<string, number> = {
+     ·           ──────┬─────
+     ·                 ╰── previous definition of `foodDatabase` here
+  42 │       'pasta': 131,     // per 100g cooked
+  43 │       'rice': 130,      // per 100g cooked
+  44 │       'oats': 307,      // per 100g
+  45 │       'banana': 105,    // per medium banana
+  46 │       'apple': 95,      // per medium apple
+  47 │       'chicken': 165,   // per 100g
+  48 │       'egg': 70,        // per large egg
+  49 │       'milk': 42,       // per 100ml
+  50 │       'bread': 265,     // per 100g
+  51 │     };
+  52 │ 
+  53 │     // Try to match basic quantities
+  54 │     const simpleMatch = /(\d+)\s+([a-zA-Z\s]+)s?/i.exec(prompt);
+  55 │     if (simpleMatch) {
+  56 │       const [, quantity, foodName] = simpleMatch;
+  57 │       const cleanFoodName = foodName.trim().toLowerCase();
+  58 │       const calories = foodDatabase[cleanFoodName];
+  59 │       
+  60 │       if (calories) {
+  61 │         return JSON.stringify([{
+  62 │           name: cleanFoodName,
+  63 │           calories: calories * parseInt(quantity),
+  64 │           serving: `${quantity} serving${parseInt(quantity) > 1 ? 's' : ''}`
+  65 │         }]);
+  66 │       }
+  67 │     }
+  68 │ 
+  69 │     return JSON.stringify([{
+  70 │       name: prompt.trim(),
+  71 │       calories: 0,
+  72 │       serving: "1 serving"
+  73 │     }]);
+  74 │     const portionMatch = prompt.match(foodMatch);
+  75 │ 
+  76 │     if (portionMatch) {
+  77 │       const [, totalAmount, foodName, servingSize, caloriesPerServing] = portionMatch;
+  78 │       const total = parseFloat(totalAmount);
+  79 │       const serving = parseFloat(servingSize);
+  80 │       const calsPerServing = parseFloat(caloriesPerServing);
+  81 │ 
+  82 │       const totalCalories = Math.round((total / serving) * calsPerServing);
+  83 │       console.log(`Calculating calories for ${foodName}: ${total}g / ${serving}g * ${calsPerServing} calories = ${totalCalories} calories`);
+  84 │ 
+  85 │       return JSON.stringify([{
+  86 │         name: foodName.trim(),
+  87 │         calories: totalCalories,
+  88 │         serving: `${total}g`
+  89 │       }]);
+  90 │     }
+  91 │ 
+  92 │     // Simple food calorie pattern (e.g., "2 banana")
+  93 │     const simpleFoodMatch = /^(\d+)\s+([a-zA-Z]+)s?$/i;
+  94 │     const simpleMatch = prompt.match(simpleFoodMatch);
+  95 │ 
+  96 │     if (simpleMatch) {
+  97 │       const [, amount, foodName] = simpleMatch;
+  98 │       const cleanFoodName = foodName.trim().toLowerCase();
+  99 │ 
+ 100 │       // Food calorie database (per serving)
+ 101 │       const foodDatabase: Record<string, number> = {
+ 102 │         'banana': 105,    // per medium banana
+ 103 │         'apple': 95,      // per medium apple
+ 104 │         'orange': 62,     // per medium orange
+ 105 │         'egg': 70,        // per large egg
+ 106 │         'oat': 307,      // per 100g
+ 107 │       };
+ 108 │ 
+ 109 │       const baseCalories = foodDatabase[cleanFoodName] || 0;
+ 110 │       const totalCalories = baseCalories * parseInt(amount);
+ 111 │ 
+ 112 │       if (baseCalories === 0) {
+ 113 │         console.log(`Food "${cleanFoodName}" not found in database`);
+ 114 │       }
+ 115 │ 
+ 116 │       return JSON.stringify([{
+ 117 │         name: foodName.trim(),
+ 118 │         calories: totalCalories,
+ 119 │         serving: `${amount} serving${amount > 1 ? 's' : ''}`
+ 120 │       }]);
+ 121 │     }
+ 122 │ 
+ 123 │     // Food calorie database (simplified)
+ 124 │     const foodDatabase: Record<string, number> = {
+     ·           ──────┬─────
+     ·                 ╰── `foodDatabase` redefined here
+ 125 │       'oats': 307,      // per 100g
+ 126 │       'banana': 105,    // per medium banana
+ 127 │       'apple': 95,      // per medium apple
+     ╰────
+/home/runner/workspace/src/contexts/AIContext.tsx:22:1
+244|        setMessages(prev => [...prev, assistantMessage]);
+245|        return result;
+246|      } catch (error) {
+   |    ^
+247|        console.error('Error processing image:', error);
+248|        return [];
