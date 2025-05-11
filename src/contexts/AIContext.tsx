@@ -17,6 +17,24 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 // Function to generate mock responses
 const generateMockResponse = async (prompt: string): Promise<string> => {
   // Parse user input into food items
+  // Extract quantity, unit, and food name from input
+  const riceMatch = prompt.match(/(\d+)\s*(g|gm|gram)\s+of\s+rice\s+where\s+(\d+)\s*(g|gm|gram)\s+serving\s+size\s+has\s+(\d+)\s+calorie/i);
+  
+  if (riceMatch) {
+    const totalGrams = parseFloat(riceMatch[1]);
+    const servingGrams = parseFloat(riceMatch[3]);
+    const caloriesPerServing = parseFloat(riceMatch[5]);
+    
+    // Calculate total calories based on proportion
+    const totalCalories = Math.round((totalGrams / servingGrams) * caloriesPerServing);
+    
+    return JSON.stringify([{
+      name: "Rice",
+      calories: totalCalories,
+      serving: `${totalGrams}g`
+    }]);
+  }
+  
   const foodRegex = /(\d*\.?\d*)\s*(cup|slice|tablespoon|tbsp|tsp|teaspoon|g|gram|ml|piece|pieces|whole|medium|large|small)?\s*(?:of\s+)?([a-zA-Z\s]+)/g;
   const matches = [...prompt.matchAll(foodRegex)];
   
@@ -25,7 +43,7 @@ const generateMockResponse = async (prompt: string): Promise<string> => {
     const unit = match[2] || "serving";
     const name = match[3].trim();
     
-    // Simplified calorie estimation (you can expand this)
+    // Simplified calorie estimation
     const calorieEstimates: { [key: string]: number } = {
       milk: 103,
       bread: 79,
