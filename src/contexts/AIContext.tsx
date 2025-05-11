@@ -23,10 +23,11 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_GEMINI_API_KEY}`
       },
       body: JSON.stringify({
         contents: [{
@@ -34,21 +35,22 @@ const generateResponse = async (prompt: string): Promise<string> => {
             text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]. Food to analyze: ${prompt}`
           }]
         }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024
-        }
+        safetySettings: [{
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE"
+        }]
       })
     });
 
     if (!response.ok) {
       console.error('API Response:', response);
+      const errorData = await response.json().catch(() => ({}));
       if (response.status === 401) {
         throw new Error('Invalid Gemini API key');
+      } else if (response.status === 404) {
+        throw new Error('Invalid Gemini API endpoint');
       } else {
-        throw new Error(`Gemini API error: ${response.status}`);
+        throw new Error(`Gemini API error: ${errorData.error?.message || response.status}`);
       }
     }
 
