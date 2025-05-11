@@ -159,7 +159,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       
       const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
       
-      const result = await model.generateContent([
+      const geminiResult = await model.generateContent([
         prompt,
         {
           inlineData: {
@@ -169,30 +169,24 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       ]);
       
-      const response = await result.response;
-      const aiResponse = response.text();
+      const response = await geminiResult.response;
+      const responseText = response.text();
 
-      if (!aiResponse) {
-        throw new Error(`Gemini API request failed: ${response.statusText}`);
+      if (!responseText) {
+        throw new Error(`Gemini API request failed: Empty response`);
       }
 
-      const data = await response.json();
-      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        throw new Error('Invalid API response structure');
-      }
-      
-      const aiResponse = data.candidates[0].content.parts[0].text;
-      console.log('Gemini API Response:', aiResponse); // For debugging
+      console.log('Gemini API Response:', responseText); // For debugging
 
       // Parse the response and extract food items
-      let result: FoodItem[] = [];
+      let foodItems: FoodItem[] = [];
       try {
         // Clean up the response text and extract JSON
-        const jsonMatch = aiResponse.match(/\[.*\]/s);
-        const jsonStr = jsonMatch ? jsonMatch[0] : aiResponse;
+        const jsonMatch = responseText.match(/\[.*\]/s);
+        const jsonStr = jsonMatch ? jsonMatch[0] : responseText;
         const parsedItems = JSON.parse(jsonStr);
         
-        result = parsedItems.map((item: any) => ({
+        foodItems = parsedItems.map((item: any) => ({
           id: uuidv4(),
           name: item.name || "Unknown Food",
           calories: typeof item.calories === 'number' ? item.calories : parseInt(item.calories) || 100,
@@ -201,8 +195,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }));
 
         // Ensure we have at least one item with calories
-        if (result.length === 0 || result.every(item => item.calories === 0)) {
-          result = [{
+        if (foodItems.length === 0 || foodItems.every(item => item.calories === 0)) {
+          foodItems = [{
             id: uuidv4(),
             name: "Detected Food",
             calories: 100,
@@ -212,7 +206,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       } catch (e) {
         console.error('Error parsing Gemini response:', e);
-        result = [{
+        foodItems = [{
           id: uuidv4(),
           name: "Unknown food",
           calories: 0,
