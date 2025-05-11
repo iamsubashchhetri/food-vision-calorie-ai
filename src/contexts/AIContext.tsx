@@ -39,32 +39,27 @@ const generateResponse = async (prompt: string): Promise<string> => {
       }]);
     }
     
-    // If no serving size calculation needed, use Deepseek API
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1` 
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: [{
-          role: "system",
-          content: "You are a nutrition expert. Extract food items, quantities, and calculate calories. Return response in JSON format."
-        }, {
-          role: "user",
-          content: prompt
-        }],
-        temperature: 0.3
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+    // Parse food items and calculate calories
+    const foodItems = [];
+    const foodPattern = /🍽️\s*([^🍽️]+?)(?=🍽️|$)/g;
+    let match;
+    
+    while ((match = foodPattern.exec(prompt)) !== null) {
+      const itemText = match[1].trim();
+      const nameMatch = /^(.+?)(?:\n|$)/i.exec(itemText);
+      const servingMatch = /(\d+)\s*(?:serving|g|gm|gram)/i.exec(itemText);
+      const calorieMatch = /(\d+)\s*(?:kcal|calorie|cal)/i.exec(itemText);
+      
+      if (nameMatch && calorieMatch) {
+        foodItems.push({
+          name: nameMatch[1].trim(),
+          calories: parseInt(calorieMatch[1]),
+          serving: servingMatch ? servingMatch[0] : "1 serving"
+        });
+      }
     }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
+    
+    return JSON.stringify(foodItems);
   } catch (error) {
     console.error('Error calling Deepseek API:', error);
     // Fallback to regex parsing if API fails
