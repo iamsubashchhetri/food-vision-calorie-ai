@@ -17,9 +17,9 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
-      console.error('Deepseek API key is missing');
+      console.error('Gemini API key is missing');
       throw new Error('API key not configured');
     }
 
