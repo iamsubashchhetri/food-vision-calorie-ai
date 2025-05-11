@@ -23,7 +23,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -33,7 +33,13 @@ const generateResponse = async (prompt: string): Promise<string> => {
           parts: [{
             text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]. Food to analyze: ${prompt}`
           }]
-        }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024
+        }
       })
     });
 
