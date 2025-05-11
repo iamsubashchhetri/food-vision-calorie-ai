@@ -36,10 +36,16 @@ const generateResponse = async (prompt: string): Promise<string> => {
     });
 
     if (!response.ok) {
+      console.error('API Response:', response);
       throw new Error(`Deepseek API error: ${response.status}`);
     }
 
     const data = await response.json();
+    if (!data.choices?.[0]?.message?.content) {
+      console.error('Invalid API response structure:', data);
+      throw new Error('Invalid API response structure');
+    }
+    
     const aiResponse = data.choices[0].message.content;
 
     try {
@@ -60,7 +66,11 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }]);
 
   } catch (error) {
-    console.error('Error in generateResponse:', error);
+    console.error('Error in generateResponse:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return JSON.stringify([]);
   }
 };
