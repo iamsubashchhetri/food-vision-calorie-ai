@@ -61,10 +61,11 @@ const generateResponse = async (prompt: string): Promise<string> => {
     const aiResponse = data.choices[0].message.content;
 
     try {
-      // Validate that the response is a valid JSON array
-      const parsedResponse = JSON.parse(aiResponse);
+      // Remove markdown code block if present
+      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+      const parsedResponse = JSON.parse(jsonStr);
       if (Array.isArray(parsedResponse)) {
-        return aiResponse;
+        return jsonStr;
       }
     } catch (e) {
       console.error('Invalid JSON response from AI:', aiResponse);
