@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Camera, X } from 'lucide-react';
 
 interface CameraViewProps {
@@ -10,46 +10,17 @@ interface CameraViewProps {
 const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
   const [mockImageUrl, setMockImageUrl] = useState<string | null>(null);
   
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-      }
-    };
-    startCamera();
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
-
+  // This is a mock implementation since we can't access real camera in the browser sandbox
+  // In a real React Native app, we would use the camera API
   const handleCapture = () => {
-    if (!videoRef.current) return;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.drawImage(videoRef.current, 0, 0);
-    const imageUrl = canvas.toDataURL('image/jpeg');
-    setMockImageUrl(imageUrl);
-    onCapture(imageUrl);
-
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
+    // Mock image URL for demonstration
+    const mockUrl = 'https://picsum.photos/400/300';
+    setMockImageUrl(mockUrl);
+    
+    // In a real app we would have actual camera functionality
+    setTimeout(() => {
+      onCapture(mockUrl);
+    }, 1000);
   };
   
   return (
@@ -82,13 +53,12 @@ const CameraView: React.FC<CameraViewProps> = ({ onCapture, onCancel }) => {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 w-full h-full flex items-center justify-center">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full h-full object-cover"
-            />
+          <div className="bg-gray-800 w-full h-full flex items-center justify-center text-gray-400">
+            <div className="text-center">
+              <Camera size={48} className="mx-auto mb-2" />
+              <p>Camera preview would appear here</p>
+              <p className="text-sm opacity-70">(Mock implementation)</p>
+            </div>
           </div>
         )}
       </div>

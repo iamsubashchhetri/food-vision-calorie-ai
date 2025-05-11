@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -16,85 +15,94 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-const analyzeImageWithGemini = async (imageBase64: string): Promise<string> => {
+const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=AIzaSyApHWVU-ozOdkE-zllCXuBR_m9kioHK5Wg', {
+    const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      console.error('Deepseek API key is missing');
+      throw new Error('API key not configured');
+    }
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer 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`
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: "Analyze this food image and provide the name and estimated calories. Format the response as a JSON array with 'name' and 'calories' fields." },
-            { inlineData: { mimeType: "image/jpeg", data: imageBase64.split(',')[1] } }
-          ]
+        model: "deepseek/deepseek-r1:free",
+        messages: [{
+          role: "system",
+          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
+        }, {
+          role: "user",
+          content: prompt
         }]
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      console.error('API Response:', response);
+      if (response.status === 402) {
+        throw new Error('Deepseek API subscription required or payment needed');
+      } else if (response.status === 401) {
+        throw new Error('Invalid API key or authentication failed');
+      } else {
+        throw new Error(`Deepseek API error: ${response.status}`);
+      }
     }
 
     const data = await response.json();
-    return data.candidates[0]?.content?.parts[0]?.text || '';
+    if (!data.choices?.[0]?.message?.content) {
+      console.error('Invalid API response structure:', data);
+      throw new Error('Invalid API response structure');
+    }
+    
+    const aiResponse = data.choices[0].message.content;
+
+    try {
+      // Remove markdown code block if present
+      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+      const parsedResponse = JSON.parse(jsonStr);
+      if (Array.isArray(parsedResponse)) {
+        return jsonStr;
+      }
+    } catch (e) {
+      console.error('Invalid JSON response from AI:', aiResponse);
+    }
+
+    // Default response if parsing fails
+    return JSON.stringify([{
+      name: prompt.trim(),
+      calories: 0,
+      serving: "1 serving"
+    }]);
+
   } catch (error) {
-    console.error('Error analyzing image:', error);
-    throw error;
+    console.error('Error in generateResponse:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return JSON.stringify([]);
   }
 };
 
-const generateResponse = async (prompt: string, retries = 2): Promise<string> => {
+const parseChatGPTResponse = (responseText: string): FoodItem[] => {
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer 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`
-        },
-        body: JSON.stringify({
-          model: "deepseek/deepseek-r1:free",
-          messages: [{
-            role: "system",
-            content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
-          }, {
-            role: "user",
-            content: prompt
-          }]
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        if (retries > 0) {
-          console.log(`Retrying... ${retries} attempts left`);
-          return generateResponse(prompt, retries - 1);
-        }
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.choices[0]?.message?.content || '';
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        if (retries > 0) {
-          console.log(`Request timed out. Retrying... ${retries} attempts left`);
-          return generateResponse(prompt, retries - 1);
-        }
-        throw new Error('Request timeout');
-      }
-      throw error;
+    const jsonData = JSON.parse(responseText);
+    if (Array.isArray(jsonData)) {
+      return jsonData.map(item => ({
+        id: uuidv4(),
+        name: item.name || "Unknown food",
+        calories: parseInt(item.calories) || 0,
+        serving: item.serving || "1 serving"
+      }));
     }
+    return [];
   } catch (error) {
-    console.error('Error in generateResponse:', error);
-    throw error;
+    console.error('Error parsing response:', error);
+    return [];
   }
 };
 
@@ -111,31 +119,26 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         content: text,
         timestamp: formatISO(new Date())
       };
+
       setMessages(prev => [...prev, userMessage]);
+      const response = await generateResponse(text);
+      const result = parseChatGPTResponse(response);
 
-      const aiResponse = await generateResponse(text);
-      let foodItems: FoodItem[] = [];
-      try {
-        foodItems = JSON.parse(aiResponse);
-      } catch (e) {
-        console.error('Error parsing AI response:', e);
-      }
-
-      const foodNames = foodItems.map(item => item.name).join(', ');
-      const totalCalories = foodItems.reduce((sum, item) => sum + item.calories, 0);
+      const foodNames = result.map(item => item.name).join(', ');
+      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
 
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `${foodNames}\n${totalCalories} kcal`,
+        content: `I detected: ${foodNames}. Total calories: ${totalCalories} kcal.`,
         timestamp: formatISO(new Date())
       };
-      setMessages(prev => [...prev, assistantMessage]);
 
-      return foodItems;
+      setMessages(prev => [...prev, assistantMessage]);
+      return result;
     } catch (error) {
-      console.error('Error in processTextInput:', error);
-      throw error;
+      console.error('Error processing text:', error);
+      return [];
     } finally {
       setIsProcessing(false);
     }
@@ -147,34 +150,33 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const userMessage: Message = {
         id: uuidv4(),
         role: 'user',
-        content: '📸 Analyzing food image...',
+        content: '📷 [Image uploaded]',
         timestamp: formatISO(new Date())
       };
-      setMessages(prev => [...prev, userMessage]);
 
-      const aiResponse = await analyzeImageWithGemini(imageUrl);
-      let foodItems: FoodItem[] = [];
-      try {
-        foodItems = JSON.parse(aiResponse);
-      } catch (e) {
-        console.error('Error parsing AI response:', e);
+      setMessages(prev => [...prev, userMessage]);
+      const response = await generateResponse("Default food item");
+      const result = parseChatGPTResponse(response);
+
+      if (result.length > 0) {
+        result[0].imageUrl = imageUrl;
       }
 
-      const foodNames = foodItems.map(item => item.name).join(', ');
-      const totalCalories = foodItems.reduce((sum, item) => sum + item.calories, 0);
+      const foodNames = result.map(item => item.name).join(', ');
+      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
 
       const assistantMessage: Message = {
         id: uuidv4(),
         role: 'assistant',
-        content: `${foodNames}\n${totalCalories} kcal`,
+        content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
         timestamp: formatISO(new Date())
       };
-      setMessages(prev => [...prev, assistantMessage]);
 
-      return foodItems;
+      setMessages(prev => [...prev, assistantMessage]);
+      return result;
     } catch (error) {
-      console.error('Error in processImage:', error);
-      throw error;
+      console.error('Error processing image:', error);
+      return [];
     } finally {
       setIsProcessing(false);
     }
@@ -184,20 +186,18 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     setMessages([]);
   };
 
-  return (
-    <AIContext.Provider value={{
-      messages,
-      isProcessing,
-      processTextInput,
-      processImage,
-      clearMessages
-    }}>
-      {children}
-    </AIContext.Provider>
-  );
+  const value: AIContextType = {
+    messages,
+    isProcessing,
+    processTextInput,
+    processImage,
+    clearMessages
+  };
+
+  return <AIContext.Provider value={value}>{children}</AIContext.Provider>;
 };
 
-export const useAI = () => {
+export const useAI = (): AIContextType => {
   const context = useContext(AIContext);
   if (context === undefined) {
     throw new Error('useAI must be used within an AIProvider');
