@@ -1,0 +1,239 @@
+[plugin:vite:react-swc] × cannot reassign to a variable declared with `const`
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:162:1]
+ 159 │       
+ 160 │       const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+ 161 │       
+ 162 │       const result = await model.generateContent([
+     ·             ───┬──
+     ·                ╰── const variable was declared here
+ 163 │         prompt,
+ 164 │         {
+ 165 │           inlineData: {
+ 166 │             mimeType: "image/jpeg",
+ 167 │             data: base64Image
+ 168 │           }
+ 169 │         }
+ 170 │       ]);
+ 171 │       
+ 172 │       const response = await result.response;
+ 173 │       const aiResponse = response.text();
+ 174 │ 
+ 175 │       if (!aiResponse) {
+ 176 │         throw new Error(`Gemini API request failed: ${response.statusText}`);
+ 177 │       }
+ 178 │ 
+ 179 │       const data = await response.json();
+ 180 │       if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+ 181 │         throw new Error('Invalid API response structure');
+ 182 │       }
+ 183 │       
+ 184 │       const aiResponse = data.candidates[0].content.parts[0].text;
+ 185 │       console.log('Gemini API Response:', aiResponse); // For debugging
+ 186 │ 
+ 187 │       // Parse the response and extract food items
+ 188 │       let result: FoodItem[] = [];
+ 189 │       try {
+ 190 │         // Clean up the response text and extract JSON
+ 191 │         const jsonMatch = aiResponse.match(/\[.*\]/s);
+ 192 │         const jsonStr = jsonMatch ? jsonMatch[0] : aiResponse;
+ 193 │         const parsedItems = JSON.parse(jsonStr);
+ 194 │         
+ 195 │         result = parsedItems.map((item: any) => ({
+     ·         ───┬──
+     ·            ╰── cannot reassign
+ 196 │           id: uuidv4(),
+ 197 │           name: item.name || "Unknown Food",
+ 198 │           calories: typeof item.calories === 'number' ? item.calories : parseInt(item.calories) || 100,
+     ╰────
+  × cannot reassign to a variable declared with `const`
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:162:1]
+ 159 │       
+ 160 │       const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+ 161 │       
+ 162 │       const result = await model.generateContent([
+     ·             ───┬──
+     ·                ╰── const variable was declared here
+ 163 │         prompt,
+ 164 │         {
+ 165 │           inlineData: {
+ 166 │             mimeType: "image/jpeg",
+ 167 │             data: base64Image
+ 168 │           }
+ 169 │         }
+ 170 │       ]);
+ 171 │       
+ 172 │       const response = await result.response;
+ 173 │       const aiResponse = response.text();
+ 174 │ 
+ 175 │       if (!aiResponse) {
+ 176 │         throw new Error(`Gemini API request failed: ${response.statusText}`);
+ 177 │       }
+ 178 │ 
+ 179 │       const data = await response.json();
+ 180 │       if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+ 181 │         throw new Error('Invalid API response structure');
+ 182 │       }
+ 183 │       
+ 184 │       const aiResponse = data.candidates[0].content.parts[0].text;
+ 185 │       console.log('Gemini API Response:', aiResponse); // For debugging
+ 186 │ 
+ 187 │       // Parse the response and extract food items
+ 188 │       let result: FoodItem[] = [];
+ 189 │       try {
+ 190 │         // Clean up the response text and extract JSON
+ 191 │         const jsonMatch = aiResponse.match(/\[.*\]/s);
+ 192 │         const jsonStr = jsonMatch ? jsonMatch[0] : aiResponse;
+ 193 │         const parsedItems = JSON.parse(jsonStr);
+ 194 │         
+ 195 │         result = parsedItems.map((item: any) => ({
+ 196 │           id: uuidv4(),
+ 197 │           name: item.name || "Unknown Food",
+ 198 │           calories: typeof item.calories === 'number' ? item.calories : parseInt(item.calories) || 100,
+ 199 │           serving: item.serving || "1 serving",
+ 200 │           imageUrl: imageUrl
+ 201 │         }));
+ 202 │ 
+ 203 │         // Ensure we have at least one item with calories
+ 204 │         if (result.length === 0 || result.every(item => item.calories === 0)) {
+ 205 │           result = [{
+     ·           ───┬──
+     ·              ╰── cannot reassign
+ 206 │             id: uuidv4(),
+ 207 │             name: "Detected Food",
+ 208 │             calories: 100,
+     ╰────
+  × cannot reassign to a variable declared with `const`
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:162:1]
+ 159 │       
+ 160 │       const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+ 161 │       
+ 162 │       const result = await model.generateContent([
+     ·             ───┬──
+     ·                ╰── const variable was declared here
+ 163 │         prompt,
+ 164 │         {
+ 165 │           inlineData: {
+ 166 │             mimeType: "image/jpeg",
+ 167 │             data: base64Image
+ 168 │           }
+ 169 │         }
+ 170 │       ]);
+ 171 │       
+ 172 │       const response = await result.response;
+ 173 │       const aiResponse = response.text();
+ 174 │ 
+ 175 │       if (!aiResponse) {
+ 176 │         throw new Error(`Gemini API request failed: ${response.statusText}`);
+ 177 │       }
+ 178 │ 
+ 179 │       const data = await response.json();
+ 180 │       if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+ 181 │         throw new Error('Invalid API response structure');
+ 182 │       }
+ 183 │       
+ 184 │       const aiResponse = data.candidates[0].content.parts[0].text;
+ 185 │       console.log('Gemini API Response:', aiResponse); // For debugging
+ 186 │ 
+ 187 │       // Parse the response and extract food items
+ 188 │       let result: FoodItem[] = [];
+ 189 │       try {
+ 190 │         // Clean up the response text and extract JSON
+ 191 │         const jsonMatch = aiResponse.match(/\[.*\]/s);
+ 192 │         const jsonStr = jsonMatch ? jsonMatch[0] : aiResponse;
+ 193 │         const parsedItems = JSON.parse(jsonStr);
+ 194 │         
+ 195 │         result = parsedItems.map((item: any) => ({
+ 196 │           id: uuidv4(),
+ 197 │           name: item.name || "Unknown Food",
+ 198 │           calories: typeof item.calories === 'number' ? item.calories : parseInt(item.calories) || 100,
+ 199 │           serving: item.serving || "1 serving",
+ 200 │           imageUrl: imageUrl
+ 201 │         }));
+ 202 │ 
+ 203 │         // Ensure we have at least one item with calories
+ 204 │         if (result.length === 0 || result.every(item => item.calories === 0)) {
+ 205 │           result = [{
+ 206 │             id: uuidv4(),
+ 207 │             name: "Detected Food",
+ 208 │             calories: 100,
+ 209 │             serving: "1 serving",
+ 210 │             imageUrl: imageUrl
+ 211 │           }];
+ 212 │         }
+ 213 │       } catch (e) {
+ 214 │         console.error('Error parsing Gemini response:', e);
+ 215 │         result = [{
+     ·         ───┬──
+     ·            ╰── cannot reassign
+ 216 │           id: uuidv4(),
+ 217 │           name: "Unknown food",
+ 218 │           calories: 0,
+     ╰────
+  × the name `aiResponse` is defined multiple times
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:173:1]
+ 170 │       ]);
+ 171 │       
+ 172 │       const response = await result.response;
+ 173 │       const aiResponse = response.text();
+     ·             ─────┬────
+     ·                  ╰── previous definition of `aiResponse` here
+ 174 │ 
+ 175 │       if (!aiResponse) {
+ 176 │         throw new Error(`Gemini API request failed: ${response.statusText}`);
+ 177 │       }
+ 178 │ 
+ 179 │       const data = await response.json();
+ 180 │       if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+ 181 │         throw new Error('Invalid API response structure');
+ 182 │       }
+ 183 │       
+ 184 │       const aiResponse = data.candidates[0].content.parts[0].text;
+     ·             ─────┬────
+     ·                  ╰── `aiResponse` redefined here
+ 185 │       console.log('Gemini API Response:', aiResponse); // For debugging
+ 186 │ 
+ 187 │       // Parse the response and extract food items
+     ╰────
+  × the name `result` is defined multiple times
+     ╭─[/home/runner/workspace/src/contexts/AIContext.tsx:162:1]
+ 159 │       
+ 160 │       const prompt = "You are a nutrition expert. Analyze this food image and provide a detailed response in this exact JSON format: [{name: string, calories: number, serving: string}]. Be accurate with calorie estimates based on visible portions.";
+ 161 │       
+ 162 │       const result = await model.generateContent([
+     ·             ───┬──
+     ·                ╰── previous definition of `result` here
+ 163 │         prompt,
+ 164 │         {
+ 165 │           inlineData: {
+ 166 │             mimeType: "image/jpeg",
+ 167 │             data: base64Image
+ 168 │           }
+ 169 │         }
+ 170 │       ]);
+ 171 │       
+ 172 │       const response = await result.response;
+ 173 │       const aiResponse = response.text();
+ 174 │ 
+ 175 │       if (!aiResponse) {
+ 176 │         throw new Error(`Gemini API request failed: ${response.statusText}`);
+ 177 │       }
+ 178 │ 
+ 179 │       const data = await response.json();
+ 180 │       if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+ 181 │         throw new Error('Invalid API response structure');
+ 182 │       }
+ 183 │       
+ 184 │       const aiResponse = data.candidates[0].content.parts[0].text;
+ 185 │       console.log('Gemini API Response:', aiResponse); // For debugging
+ 186 │ 
+ 187 │       // Parse the response and extract food items
+ 188 │       let result: FoodItem[] = [];
+     ·           ───┬──
+     ·              ╰── `result` redefined here
+ 189 │       try {
+ 190 │         // Clean up the response text and extract JSON
+ 191 │         const jsonMatch = aiResponse.match(/\[.*\]/s);
+     ╰────
+/home/runner/workspace/src/contexts/AIContext.tsx:162:1
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
