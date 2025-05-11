@@ -76,12 +76,12 @@ const generateResponse = async (prompt: string): Promise<string> => {
 
     const data = await response.json();
 
-    const response = data.choices[0]?.message;
-    if (!response?.content) {
+    const aiMessage = data.choices[0]?.message;
+    if (!aiMessage?.content) {
       throw new Error('Invalid API response structure');
     }
 
-    const content = response.content.trim();
+    const content = aiMessage.content.trim();
 
     try {
       // Try to parse the response as JSON
