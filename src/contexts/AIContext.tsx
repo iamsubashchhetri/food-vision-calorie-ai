@@ -18,13 +18,20 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 // Function to process text with ChatGPT API via RapidAPI
 const processChatGPT = async (prompt: string): Promise<string> => {
   try {
-    const encodedPrompt = encodeURIComponent(prompt);
-    const response = await fetch(`https://free-chatgpt-api.p.rapidapi.com/chat-completion-one?prompt=${encodedPrompt}`, {
-      method: 'GET',
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
       headers: {
-        'x-rapidapi-host': 'free-chatgpt-api.p.rapidapi.com',
-        'x-rapidapi-key': 'f8720c2735msh73cb6a2df67e695p12c409jsn6cbdb1f8133e'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          {role: 'system', content: 'You are a nutritionist AI that analyzes food descriptions and provides calorie estimates in JSON format.'},
+          {role: 'user', content: prompt}
+        ],
+        stream: false
+      })
     });
 
     if (!response.ok) {
