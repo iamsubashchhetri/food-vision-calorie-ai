@@ -16,22 +16,35 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 // Function to generate mock responses
 const generateMockResponse = async (prompt: string): Promise<string> => {
-  // Parse user input into food items
-  // Extract quantity, unit, and food name from input
-  const riceMatch = prompt.match(/(\d+)\s*(g|gm|gram)\s+of\s+rice\s+where\s+(\d+)\s*(g|gm|gram)\s+serving\s+size\s+has\s+(\d+)\s+calorie/i);
+  // Parse user input for food with serving size and calories
+  const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:of\s+)?([a-zA-Z\s]+)\s+where\s+(\d+)\s*(g|gm|gram|ml|cup|tbsp|tsp)\s+(?:serving\s+size\s+)?has\s+(\d+)\s+calorie/i);
   
-  if (riceMatch) {
-    const totalGrams = parseFloat(riceMatch[1]);
-    const servingGrams = parseFloat(riceMatch[3]);
-    const caloriesPerServing = parseFloat(riceMatch[5]);
+  if (foodMatch) {
+    const [, quantity, unit, foodName, servingSize, servingUnit, calories] = foodMatch;
+    const amount = parseFloat(quantity);
+    const baseServing = parseFloat(servingSize);
+    const caloriesPerServing = parseFloat(calories);
+    
+    // Convert different units to a common base if needed
+    const getBaseAmount = (val: number, unit: string) => {
+      switch(unit.toLowerCase()) {
+        case 'cup': return val * 240; // 1 cup ≈ 240ml
+        case 'tbsp': return val * 15; // 1 tbsp ≈ 15ml
+        case 'tsp': return val * 5;  // 1 tsp ≈ 5ml
+        default: return val;
+      }
+    };
+    
+    const normalizedAmount = getBaseAmount(amount, unit);
+    const normalizedServing = getBaseAmount(baseServing, servingUnit);
     
     // Calculate total calories based on proportion
-    const totalCalories = Math.round((totalGrams / servingGrams) * caloriesPerServing);
+    const totalCalories = Math.round((normalizedAmount / normalizedServing) * caloriesPerServing);
     
     return JSON.stringify([{
-      name: "Rice",
+      name: foodName.trim(),
       calories: totalCalories,
-      serving: `${totalGrams}g`
+      serving: `${amount}${unit}`
     }]);
   }
   
