@@ -23,7 +23,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -33,18 +33,19 @@ const generateResponse = async (prompt: string): Promise<string> => {
           parts: [{
             text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]. Food to analyze: ${prompt}`
           }]
-        }]
+        }],
+        generationConfig: {
+          temperature: 0.3
+        }
       })
     });
 
     if (!response.ok) {
       console.error('API Response:', response);
-      if (response.status === 402) {
-        throw new Error('Deepseek API subscription required or payment needed');
-      } else if (response.status === 401) {
-        throw new Error('Invalid API key or authentication failed');
+      if (response.status === 401) {
+        throw new Error('Invalid Gemini API key');
       } else {
-        throw new Error(`Deepseek API error: ${response.status}`);
+        throw new Error(`Gemini API error: ${response.status}`);
       }
     }
 
