@@ -14,36 +14,27 @@ interface AIContextType {
 // Create the context
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-// Function to process text with ChatGPT API via RapidAPI
-const processChatGPT = async (prompt: string): Promise<string> => {
-  try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.DEEPSEEK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {role: 'system', content: 'You are a nutritionist AI that analyzes food descriptions and provides calorie estimates in JSON format.'},
-          {role: 'user', content: prompt}
-        ],
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+// Function to generate mock responses
+const generateMockResponse = async (prompt: string): Promise<string> => {
+  const mockResponses = [
+    {
+      name: "Banana",
+      calories: 105,
+      serving: "1 medium"
+    },
+    {
+      name: "Apple",
+      calories: 95,
+      serving: "1 medium"
+    },
+    {
+      name: "Orange",
+      calories: 62,
+      serving: "1 medium"
     }
-
-    const data = await response.json();
-    console.log("API Response:", data);
-    return data.response || data.message || "No response";
-  } catch (error) {
-    console.error('Error calling ChatGPT API:', error);
-    throw error;
-  }
+  ];
+  
+  return JSON.stringify(mockResponses);
 };
 
 // Parse the ChatGPT response to extract food items and calories
@@ -199,25 +190,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       setMessages(prev => [...prev, userMessage]);
 
-      // Process with ChatGPT API
-      const prompt = `
-        Analyze the following food description and estimate the calories:
-        "${text}"
-
-        I need accurate nutritional information. Be precise and account for typos like "eggg" (egg) or "banaa" (banana).
-
-        Return a JSON array with each food item including name, calories, and serving size.
-        Format: 
-        [
-          {
-            "name": "food name",
-            "calories": number,
-            "serving": "serving description"
-          }
-        ]
-      `;
-
-      const chatGPTResponse = await processChatGPT(prompt);
+      // Generate mock response
+      const mockResponse = await generateMockResponse(text);
       const result = parseChatGPTResponse(chatGPTResponse);
 
       // Construct the response message based on results
@@ -267,23 +241,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       // Process with ChatGPT API - note this API doesn't support image processing
       // so we'll send a message saying we're analyzing an image
-      const prompt = `
-        I'm looking at a photo of food. Let's assume it contains common items like a sandwich, 
-        some fruits, or a salad. Please provide an estimate of what might be in this meal and
-        the approximate calories.
-
-        Return a JSON array with potential food items including name, calories, and serving size.
-        Format: 
-        [
-          {
-            "name": "food name",
-            "calories": number,
-            "serving": "serving description"
-          }
-        ]
-      `;
-
-      const chatGPTResponse = await processChatGPT(prompt);
+      const mockResponse = await generateMockResponse("mock image");
       const result = parseChatGPTResponse(chatGPTResponse);
 
       // Add imageUrl to the first item
