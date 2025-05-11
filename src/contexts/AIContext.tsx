@@ -15,7 +15,7 @@ interface AIContextType {
 
 const AIContext = createContext<AIContextType | undefined>(undefined);
 
-const generateResponse = async (prompt: string): Promise<string> => {
+const generateResponse = async (prompt: string, retries = 2): Promise<string> => {
   try {
     const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
     if (!apiKey) {
@@ -23,33 +23,53 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('API key not configured');
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer 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`
-      },
-      body: JSON.stringify({
-        model: "deepseek/deepseek-r1:free",
-        messages: [{
-          role: "system",
-          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
-        }, {
-          role: "user",
-          content: prompt
-        }]
-      })
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
+    try {
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer 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`
+        },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-r1:free",
+          messages: [{
+            role: "system",
+            content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
+          }, {
+            role: "user",
+            content: prompt
+          }]
+        }),
+        signal: controller.signal
+      });
+
+    clearTimeout(timeoutId);
+    
     if (!response.ok) {
       console.error('API Response:', response);
       if (response.status === 402) {
         throw new Error('Deepseek API subscription required or payment needed');
       } else if (response.status === 401) {
         throw new Error('Invalid API key or authentication failed');
+      } else if (retries > 0) {
+        console.log(`Retrying... ${retries} attempts left`);
+        return generateResponse(prompt, retries - 1);
       } else {
         throw new Error(`Deepseek API error: ${response.status}`);
       }
+    }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        if (retries > 0) {
+          console.log(`Request timed out. Retrying... ${retries} attempts left`);
+          return generateResponse(prompt, retries - 1);
+        }
+        throw new Error('Request timeout');
+      }
+      throw error;
     }
 
     const data = await response.json();
