@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 'use client';
 
@@ -153,7 +153,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const base64Image = imageUrl.split(',')[1];
       
       const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-      const genAI = new GoogleGenAI({ apiKey: API_KEY });
+      const genAI = new GoogleGenerativeAI(API_KEY);
       
       const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
       
