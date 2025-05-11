@@ -81,15 +81,26 @@ const generateResponse = async (prompt: string): Promise<string> => {
       throw new Error('Invalid API response structure');
     }
 
-    // Force JSON response format by extracting reasoning and converting to JSON
-    const items = aiMessage.reasoning.match(/(\d+)\s*(?:calories|kcal)/gi);
-    const calories = items ? parseInt(items[0]) : 0;
-    const foodName = aiMessage.reasoning.split('.')[0].replace(/^Okay,?\s*|^I\s*|^Let\s*/i, '').trim();
+    // Extract quantity from the reasoning
+    const quantityMatch = aiMessage.reasoning.match(/(\d+)\s*(?:bananas?|apples?|pieces?|servings?)/i);
+    const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
+    
+    // Extract base calories (per piece)
+    const calorieMatch = aiMessage.reasoning.match(/(\d+)\s*(?:calories|kcal)/i);
+    const baseCalories = calorieMatch ? parseInt(calorieMatch[1]) : 0;
+    
+    // Get food name and clean it
+    const foodName = aiMessage.reasoning
+      .split('.')[0]
+      .replace(/^Okay,?\s*|^I\s*|^Let\s*/i, '')
+      .replace(/the user asked.*?for/i, '')
+      .replace(/\d+\s+/, '')
+      .trim();
     
     const content = JSON.stringify([{
       name: foodName,
-      calories: calories,
-      serving: "1 serving"
+      calories: baseCalories * quantity,
+      serving: `${quantity} piece${quantity > 1 ? 's' : ''}`
     }]);
 
     try {
