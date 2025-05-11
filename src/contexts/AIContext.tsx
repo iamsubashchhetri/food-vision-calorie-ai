@@ -17,11 +17,11 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`
+        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1`
       },
       body: JSON.stringify({
         model: "deepseek-chat",
@@ -34,16 +34,20 @@ const generateResponse = async (prompt: string): Promise<string> => {
             role: "user",
             content: `Analyze this food description and calculate calories: ${prompt}`
           }
-        ],
-        stream: false
+        ]
       })
     });
 
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Deepseek API error:', errorData);
       throw new Error(`Deepseek API error: ${response.status}`);
     }
 
     const data = await response.json();
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Invalid response format from Deepseek API');
+    }
     return data.choices[0].message.content;
     const portionMatch = prompt.match(foodMatch);
 
