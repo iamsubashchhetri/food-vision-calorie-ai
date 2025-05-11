@@ -31,32 +31,39 @@ const foodDatabase: Record<string, number> = {
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // First try to match detailed pattern with serving size and calories
-    const foodMatch = /(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*\((?:serving size|per serving)?\s*(\d+)\s*(?:g|gm|gram)s?\s*(?:=|is)?\s*(\d+)\s*(?:kcal|calorie|cal)\))?/i;
-    const portionMatch = prompt.match(foodMatch);
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [{
+          role: "system",
+          content: "You are a nutritionist. When given a food description, respond only with a JSON array containing food items, their estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]"
+        }, {
+          role: "user",
+          content: prompt
+        }]
+      })
+    });
 
-    // Try to extract food items and quantities
-    const items = prompt.toLowerCase().match(/(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)/g);
-    if (items) {
-      const foodItems = [];
-      for (const item of items) {
-        const [, amount, foodName] = item.match(/(\d+)\s*(?:g|gm|gram)s?\s+(?:of\s+)?([a-zA-Z\s]+)/i) || [];
-        if (amount && foodName) {
-          const cleanFoodName = foodName.trim().toLowerCase();
-          if (foodDatabase[cleanFoodName]) {
-            const grams = parseInt(amount);
-            const calories = Math.round((grams / 100) * foodDatabase[cleanFoodName]);
-            foodItems.push({
-              name: cleanFoodName,
-              calories: calories,
-              serving: `${grams}g`
-            });
-          }
-        }
+    if (!response.ok) {
+      throw new Error(`Deepseek API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices[0].message.content;
+    
+    try {
+      // Validate that the response is a valid JSON array
+      const parsedResponse = JSON.parse(aiResponse);
+      if (Array.isArray(parsedResponse)) {
+        return aiResponse;
       }
-      if (foodItems.length > 0) {
-        return JSON.stringify(foodItems);
-      }
+    } catch (e) {
+      console.error('Invalid JSON response from AI:', aiResponse);
     }
 
     if (portionMatch) {
