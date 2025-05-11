@@ -17,15 +17,33 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
+    // Food calorie database (simplified)
+    const foodDatabase: Record<string, number> = {
+      'oats': 307,      // per 100g
+      'banana': 105,    // per medium banana
+      'apple': 95,      // per medium apple
+      'rice': 130,      // per 100g cooked
+      'chicken': 165,   // per 100g
+      'egg': 70,        // per large egg
+      'milk': 42,       // per 100ml
+    };
+
     // Simple food calorie pattern (e.g., "1 banana calorie")
     const simpleFoodMatch = /(\d+)\s+([a-zA-Z\s]+?)(?:\s+calorie|\s+calories|\s+kcal)?$/i;
     const simpleMatch = prompt.match(simpleFoodMatch);
     
     if (simpleMatch) {
       const [, amount, foodName] = simpleMatch;
+      const cleanFoodName = foodName.trim().toLowerCase();
+      const baseCalories = foodDatabase[cleanFoodName] || 0;
+      
+      if (baseCalories === 0) {
+        console.log(`Food "${cleanFoodName}" not found in database`);
+      }
+      
       return JSON.stringify([{
         name: foodName.trim(),
-        calories: 105, // Default calories for a banana
+        calories: baseCalories * parseInt(amount),
         serving: `${amount} serving`
       }]);
     }
