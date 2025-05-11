@@ -17,8 +17,25 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    // Food pattern with serving size and calories
-    const foodMatch = /(\d+)\s*(?:g|gm|gram)?\s*(?:of\s+)?([a-zA-Z\s]+)(?:\s*,\s*|\s+)(?:where\s+)?serving\s+size\s*(?:is\s+)?(\d+)\s*(?:g|gm|gram)(?:\s+for|\s+has)?\s+(\d+)\s*(?:calorie|kcal|calories)/i;
+    const axios = require('axios');
+    
+    // Call Deepseek API for food analysis
+    const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
+      model: "deepseek-chat",
+      messages: [{
+        role: "user",
+        content: `Analyze this food description and return a JSON array of detected foods with calories: "${prompt}". Format: [{name: string, calories: number, serving: string}]`
+      }],
+      temperature: 0.7
+    }, {
+      headers: {
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const analysis = response.data.choices[0].message.content;
+    return analysis;
     const portionMatch = prompt.match(foodMatch);
 
     if (portionMatch) {
