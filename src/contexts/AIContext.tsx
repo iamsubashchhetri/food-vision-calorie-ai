@@ -20,7 +20,7 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     // Extract serving size calculation from prompt
-    const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram)\s+(?:of\s+)?([a-zA-Z\s]+)\s*,?\s*(?:serving|where)\s+size\s+(?:is\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has)\s+(\d+)\s+calorie/i);
+    const foodMatch = prompt.match(/(\d+)\s*(g|gm|gram)\s+(?:of\s+)?([a-zA-Z\s]+)(?:\s*,?\s*|\s+where\s+)(?:serving\s+size\s+(?:is\s+)?|has\s+serving\s+size\s+of\s+)?(\d+)\s*(g|gm|gram)\s+(?:for|has|with)\s+(\d+)\s+calorie/i);
     
     if (foodMatch) {
       const [, totalAmount, unit1, foodName, servingSize, unit2, calories] = foodMatch;
@@ -30,6 +30,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       
       // Calculate proportional calories
       const totalCalories = Math.round((total / serving) * calsPerServing);
+      console.log(`Calculating calories: ${total}g total / ${serving}g serving * ${calsPerServing} calories = ${totalCalories} calories`);
       
       return JSON.stringify([{
         name: foodName.trim(),
@@ -43,7 +44,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        'Authorization': `Bearer sk-0e79e598702e46b7955612fcce758de1`
       },
       body: JSON.stringify({
         model: "deepseek-chat",
