@@ -17,25 +17,34 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
-    const axios = require('axios');
-    
-    // Call Deepseek API for food analysis
-    const response = await axios.post('https://api.deepseek.com/v1/chat/completions', {
-      model: "deepseek-chat",
-      messages: [{
-        role: "user",
-        content: `Analyze this food description and return a JSON array of detected foods with calories: "${prompt}". Format: [{name: string, calories: number, serving: string}]`
-      }],
-      temperature: 0.7
-    }, {
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          {
+            role: "system",
+            content: "You are a food analysis assistant. Analyze food descriptions and return calorie information in JSON format: [{name: string, calories: number, serving: string}]"
+          },
+          {
+            role: "user",
+            content: `Analyze this food description and calculate calories: ${prompt}`
+          }
+        ],
+        stream: false
+      })
     });
 
-    const analysis = response.data.choices[0].message.content;
-    return analysis;
+    if (!response.ok) {
+      throw new Error(`Deepseek API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
     const portionMatch = prompt.match(foodMatch);
 
     if (portionMatch) {
