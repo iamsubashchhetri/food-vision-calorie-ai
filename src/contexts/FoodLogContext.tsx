@@ -209,6 +209,11 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCalorieGoal(goal);
   };
 
+  const clearData = () => {
+    setLogs([]);
+    localStorage.removeItem('foodLogs');
+  };
+
   const value = {
     logs,
     todayLog,
@@ -221,6 +226,7 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCalorieGoal: setUserCalorieGoal,
     getProteinGoal: () => proteinGoal,
     setProteinGoal,
+    clearData,
   };
 
   return <FoodLogContext.Provider value={value}>{children}</FoodLogContext.Provider>;

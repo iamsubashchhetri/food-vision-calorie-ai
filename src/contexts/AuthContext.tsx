@@ -35,6 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await signOut(auth);
+      // Clear all stored data
+      localStorage.clear();
+      window.location.reload();
     } catch (error) {
       console.error('Error signing out:', error);
     }
