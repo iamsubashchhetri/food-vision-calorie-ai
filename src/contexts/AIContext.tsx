@@ -116,14 +116,15 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const result = parseChatGPTResponse(response);
 
       const analysisResults = result.map(item => {
-        const quantity = parseInt(item.name.match(/^\d+/)?.[0] || '1');
-        const foodName = item.name.replace(/^\d+\s*/, '');
+        const quantityMatch = item.name.match(/^(\d+)\s*(.*)/);
+        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
+        const foodName = quantityMatch ? quantityMatch[2] : item.name;
 
         return {
           id: uuidv4(),
           name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
-          calories: item.calories * quantity,
-          protein: item.protein * quantity,
+          calories: Math.round(item.calories * quantity),
+          protein: parseFloat((item.protein * quantity).toFixed(1)),
           serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
         };
       });
@@ -167,14 +168,15 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const analysisResults = result.map(item => {
-        const quantity = parseInt(item.name.match(/^\d+/)?.[0] || '1');
-        const foodName = item.name.replace(/^\d+\s*/, '');
+        const quantityMatch = item.name.match(/^(\d+)\s*(.*)/);
+        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
+        const foodName = quantityMatch ? quantityMatch[2] : item.name;
 
         return {
           id: uuidv4(),
           name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
-          calories: item.calories * quantity,
-          protein: item.protein * quantity,
+          calories: Math.round(item.calories * quantity),
+          protein: parseFloat((item.protein * quantity).toFixed(1)),
           serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
         };
       });
