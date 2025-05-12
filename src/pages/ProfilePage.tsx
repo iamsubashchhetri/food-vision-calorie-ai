@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { format } from 'date-fns';
 
 const ProfilePage: React.FC = () => {
-  const { getCalorieGoal, setCalorieGoal, logs } = useFoodLog();
+  const { getCalorieGoal, setCalorieGoal, getProteinGoal, setProteinGoal, logs } = useFoodLog();
   const { user, signInWithGoogle, logout } = useAuth();
   const [calorieInput, setCalorieInput] = useState(getCalorieGoal().toString());
+  const [proteinInput, setProteinInput] = useState(getProteinGoal().toString());
   const [showResetDialog, setShowResetDialog] = useState(false);
   
   const handleSaveGoal = () => {
@@ -81,6 +82,24 @@ const ProfilePage: React.FC = () => {
                 className="ios-input mr-2"
               />
               <Button onClick={handleSaveGoal} className="ios-button whitespace-nowrap">
+                Save
+              </Button>
+            </div>
+
+            <label className="block text-sm text-gray-600 mb-1 mt-4">Daily Protein Target (g)</label>
+            <div className="flex items-center">
+              <Input
+                type="number"
+                value={proteinInput}
+                onChange={(e) => setProteinInput(e.target.value)}
+                className="ios-input mr-2"
+              />
+              <Button onClick={() => {
+                const protein = parseInt(proteinInput);
+                if (!isNaN(protein) && protein > 0) {
+                  setProteinGoal(protein);
+                }
+              }} className="ios-button whitespace-nowrap">
                 Save
               </Button>
             </div>

@@ -86,6 +86,7 @@ const parseChatGPTResponse = (responseText: string): FoodItem[] => {
         id: uuidv4(),
         name: item.name || "Unknown food",
         calories: parseInt(item.calories) || 0,
+        protein: parseFloat(item.protein) || 0,
         serving: item.serving || "1 serving"
       }));
     }

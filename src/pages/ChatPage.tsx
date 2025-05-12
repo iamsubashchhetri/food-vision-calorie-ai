@@ -120,9 +120,14 @@ const ChatPage: React.FC = () => {
                 ))}
               </div>
               <div className="mt-2 text-right">
-                <span className="font-medium">
-                  Total: {foodItems.reduce((sum, item) => sum + item.calories, 0)} kcal
-                </span>
+                <div className="text-right">
+                  <span className="font-medium block">
+                    Total Calories: {foodItems.reduce((sum, item) => sum + item.calories, 0)} kcal
+                  </span>
+                  <span className="font-medium block">
+                    Total Protein: {foodItems.reduce((sum, item) => sum + (item.protein || 0), 0)}g
+                  </span>
+                </div>
               </div>
             </div>
             
