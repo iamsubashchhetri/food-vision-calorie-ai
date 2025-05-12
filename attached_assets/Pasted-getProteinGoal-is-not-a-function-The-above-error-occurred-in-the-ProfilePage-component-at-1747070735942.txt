@@ -1,0 +1,19 @@
+getProteinGoal is not a function
+The above error occurred in the <ProfilePage> component:
+
+    at ProfilePage (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/src/pages/ProfilePage.tsx:23:86)
+    at RenderedRoute (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=3a77eb28:4069:5)
+    at Routes (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=3a77eb28:4508:5)
+    at Router (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=3a77eb28:4451:15)
+    at BrowserRouter (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=3a77eb28:5196:5)
+    at AIProvider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/src/contexts/AIContext.tsx:97:30)
+    at FoodLogProvider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/src/contexts/FoodLogContext.tsx:15:35)
+    at AuthProvider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/src/contexts/AuthContext.tsx:15:32)
+    at Provider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/chunk-5H2P4PG6.js?v=3a77eb28:58:15)
+    at TooltipProvider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=3a77eb28:56:5)
+    at QueryClientProvider (https://4bc39b28-6db3-46f8-8d22-531940edb0e6-00-1xu8n679ixh0f.kirk.replit.dev/node_modules/.vite/deps/@tanstack_react-query.js?v=3a77eb28:2794:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+getProteinGoal is not a function
