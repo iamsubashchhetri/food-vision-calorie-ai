@@ -64,7 +64,7 @@ const Home: React.FC = () => {
             {mealTypeOrder.map(type => (
               mealsByType[type] && (
                 <div key={type} className="mb-5">
-                  <h3 className="text-sm font-medium text-gray-500 uppercase mb-2 capitalize">{type}</h3>
+                  <h3 className="text-sm font-medium text-foreground uppercase mb-2 capitalize">{type}</h3>
                   {mealsByType[type].map(meal => (
                     <MealCard 
                       key={meal.id} 
