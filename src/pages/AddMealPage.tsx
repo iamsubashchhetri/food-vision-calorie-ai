@@ -20,6 +20,7 @@ const AddMealPage: React.FC = () => {
   const [showAddFood, setShowAddFood] = useState(false);
   const [foodName, setFoodName] = useState('');
   const [calories, setCalories] = useState('');
+  const [protein, setProtein] = useState('');
   const [serving, setServing] = useState('');
   
   const handleAddFoodItem = () => {
@@ -28,6 +29,7 @@ const AddMealPage: React.FC = () => {
         id: uuidv4(),
         name: foodName,
         calories: parseInt(calories),
+        protein: protein ? parseFloat(protein) : undefined,
         serving: serving || undefined
       };
       
@@ -36,6 +38,7 @@ const AddMealPage: React.FC = () => {
       // Reset form
       setFoodName('');
       setCalories('');
+      setProtein('');
       setServing('');
       setShowAddFood(false);
     }
