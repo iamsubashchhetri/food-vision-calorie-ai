@@ -116,16 +116,17 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const result = parseChatGPTResponse(response);
 
       const analysisResults = result.map(item => {
-        const quantityMatch = item.name.match(/^(\d+)\s*(.*)/);
-        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-        const foodName = quantityMatch ? quantityMatch[2] : item.name;
+        // Extract quantity from the start of the food name
+        const words = item.name.split(' ');
+        const quantity = parseInt(words[0]);
+        const foodName = !isNaN(quantity) ? words.slice(1).join(' ') : item.name;
 
         return {
           id: uuidv4(),
-          name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
-          calories: Math.round(item.calories * quantity),
-          protein: parseFloat((item.protein * quantity).toFixed(1)),
-          serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
+          name: !isNaN(quantity) ? `${quantity}x ${foodName}` : foodName,
+          calories: Math.round(item.calories),
+          protein: parseFloat(item.protein.toFixed(1)),
+          serving: !isNaN(quantity) ? `${quantity}x ${item.serving}` : item.serving
         };
       });
 
@@ -168,16 +169,17 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const analysisResults = result.map(item => {
-        const quantityMatch = item.name.match(/^(\d+)\s*(.*)/);
-        const quantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
-        const foodName = quantityMatch ? quantityMatch[2] : item.name;
+        // Extract quantity from the start of the food name
+        const words = item.name.split(' ');
+        const quantity = parseInt(words[0]);
+        const foodName = !isNaN(quantity) ? words.slice(1).join(' ') : item.name;
 
         return {
           id: uuidv4(),
-          name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
-          calories: Math.round(item.calories * quantity),
-          protein: parseFloat((item.protein * quantity).toFixed(1)),
-          serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
+          name: !isNaN(quantity) ? `${quantity}x ${foodName}` : foodName,
+          calories: Math.round(item.calories),
+          protein: parseFloat(item.protein.toFixed(1)),
+          serving: !isNaN(quantity) ? `${quantity}x ${item.serving}` : item.serving
         };
       });
 
