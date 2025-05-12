@@ -115,20 +115,13 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const response = await generateResponse(text);
       const result = parseChatGPTResponse(response);
 
-      const analysisResults = result.map(item => {
-        // Extract quantity from the start of the food name
-        const words = item.name.split(' ');
-        const quantity = parseInt(words[0]);
-        const foodName = !isNaN(quantity) ? words.slice(1).join(' ') : item.name;
-
-        return {
-          id: uuidv4(),
-          name: !isNaN(quantity) ? `${quantity}x ${foodName}` : foodName,
-          calories: Math.round(item.calories),
-          protein: parseFloat(item.protein.toFixed(1)),
-          serving: !isNaN(quantity) ? `${quantity}x ${item.serving}` : item.serving
-        };
-      });
+      const analysisResults = result.map(item => ({
+        id: uuidv4(),
+        name: item.name,
+        calories: Math.round(item.calories),
+        protein: parseFloat(item.protein.toFixed(1)),
+        serving: item.serving
+      }));
 
       const foodNames = analysisResults.map(item => item.name).join(', ');
       const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
@@ -168,20 +161,13 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         result[0].imageUrl = imageUrl;
       }
 
-      const analysisResults = result.map(item => {
-        // Extract quantity from the start of the food name
-        const words = item.name.split(' ');
-        const quantity = parseInt(words[0]);
-        const foodName = !isNaN(quantity) ? words.slice(1).join(' ') : item.name;
-
-        return {
-          id: uuidv4(),
-          name: !isNaN(quantity) ? `${quantity}x ${foodName}` : foodName,
-          calories: Math.round(item.calories),
-          protein: parseFloat(item.protein.toFixed(1)),
-          serving: !isNaN(quantity) ? `${quantity}x ${item.serving}` : item.serving
-        };
-      });
+      const analysisResults = result.map(item => ({
+        id: uuidv4(),
+        name: item.name,
+        calories: Math.round(item.calories),
+        protein: parseFloat(item.protein.toFixed(1)),
+        serving: item.serving
+      }));
 
       const foodNames = analysisResults.map(item => item.name).join(', ');
       const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
