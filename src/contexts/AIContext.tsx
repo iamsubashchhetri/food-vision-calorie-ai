@@ -27,7 +27,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, and serving size. Format: [{name: string, calories: number, serving: string}]. Food to analyze: ${prompt}`
+            text: `As a nutritionist, analyze this food and respond only with a JSON array containing food items, estimated calories, protein content, and serving size. Format: [{name: string, calories: number, protein: number, serving: string}]. Food to analyze: ${prompt}`
           }]
         }],
         safetySettings: [{

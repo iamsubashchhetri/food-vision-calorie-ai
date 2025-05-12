@@ -29,7 +29,7 @@ const AddMealPage: React.FC = () => {
         id: uuidv4(),
         name: foodName,
         calories: parseInt(calories),
-        protein: protein ? parseFloat(protein) : undefined,
+        protein: protein ? parseFloat(protein) : 0,
         serving: serving || undefined
       };
       
