@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 
 const ProfilePage: React.FC = () => {
   const { getCalorieGoal, setCalorieGoal, logs } = useFoodLog();
+  const { user, signInWithGoogle, logout } = useAuth();
   const [calorieInput, setCalorieInput] = useState(getCalorieGoal().toString());
   const [showResetDialog, setShowResetDialog] = useState(false);
   
@@ -40,6 +41,28 @@ const ProfilePage: React.FC = () => {
     <Layout>
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold mb-6">Profile</h1>
+        
+        {!user ? (
+          <div className="ios-card mb-6">
+            <h2 className="text-lg font-semibold mb-4">Sign In</h2>
+            <Button onClick={signInWithGoogle} className="w-full">
+              Sign in with Google
+            </Button>
+          </div>
+        ) : (
+          <div className="ios-card mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <img src={user.photoURL || ''} alt={user.displayName || ''} className="w-12 h-12 rounded-full" />
+              <div>
+                <h2 className="font-semibold">{user.displayName}</h2>
+                <p className="text-sm text-gray-600">{user.email}</p>
+              </div>
+            </div>
+            <Button onClick={logout} variant="outline" className="w-full">
+              Sign Out
+            </Button>
+          </div>
+        )}
         
         <div className="ios-card mb-6">
           <h2 className="text-lg font-semibold flex items-center mb-4">

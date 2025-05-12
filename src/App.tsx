@@ -12,14 +12,16 @@ import ProfilePage from "./pages/ProfilePage";
 import AddMealPage from "./pages/AddMealPage";
 import { FoodLogProvider } from "./contexts/FoodLogContext";
 import { AIProvider } from "./contexts/AIContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <FoodLogProvider>
-        <AIProvider>
+      <AuthProvider>
+        <FoodLogProvider>
+          <AIProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -33,7 +35,8 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </AIProvider>
-      </FoodLogProvider>
+        </FoodLogProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
