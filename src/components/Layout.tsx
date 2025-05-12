@@ -15,13 +15,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
   
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <main className="flex-1 overflow-y-auto pb-16 px-4">
+    <div className="flex flex-col h-screen bg-gray-50">
+      <main className="flex-1 overflow-y-auto pb-16">
         {children}
       </main>
       
-      {/* Modern dark mode bottom tab bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-accent/50 backdrop-blur-lg border-t border-border py-2">
+      {/* iOS-style bottom tab bar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2">
         <div className="flex items-center justify-around">
           <Link
             to="/"
