@@ -44,19 +44,19 @@ const ProfilePage: React.FC = () => {
         <h1 className="text-2xl font-bold mb-6">Profile</h1>
 
         {!user ? (
-          <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
+          <div className="bg-card rounded-lg p-6 shadow-sm mb-6 border">
             <h2 className="text-lg font-semibold mb-4">Sign In</h2>
             <Button onClick={signInWithGoogle} className="w-full">
               Sign in with Google
             </Button>
           </div>
         ) : (
-          <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
+          <div className="bg-card rounded-lg p-6 shadow-sm mb-6 border">
             <div className="flex items-center gap-4 mb-4">
               <img src={user.photoURL || ''} alt={user.displayName || ''} className="w-12 h-12 rounded-full" />
               <div>
-                <h2 className="font-semibold">{user.displayName}</h2>
-                <p className="text-sm text-gray-600">{user.email}</p>
+                <h2 className="font-semibold text-foreground">{user.displayName}</h2>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </div>
             <Button onClick={logout} variant="outline" className="w-full">
@@ -65,7 +65,7 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
+        <div className="bg-card rounded-lg p-6 shadow-sm mb-6 border">
           <h2 className="text-lg font-semibold flex items-center mb-4">
             <Sliders className="mr-2" size={18} />
             Goals
@@ -113,24 +113,24 @@ const ProfilePage: React.FC = () => {
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
-                <h3 className="text-sm text-gray-600 mb-1">Days Tracked</h3>
-                <p className="text-xl font-semibold">{totalDays}</p>
+              <div className="p-3 bg-accent/10 rounded-lg border">
+                <h3 className="text-sm text-muted-foreground mb-1">Days Tracked</h3>
+                <p className="text-xl font-semibold text-foreground">{totalDays}</p>
               </div>
 
-              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
-                <h3 className="text-sm text-gray-600 mb-1">Total Meals</h3>
-                <p className="text-xl font-semibold">{totalMeals}</p>
+              <div className="p-3 bg-accent/10 rounded-lg border">
+                <h3 className="text-sm text-muted-foreground mb-1">Total Meals</h3>
+                <p className="text-xl font-semibold text-foreground">{totalMeals}</p>
               </div>
 
-              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
-                <h3 className="text-sm text-gray-600 mb-1">Total Calories</h3>
-                <p className="text-xl font-semibold">{totalCalories}</p>
+              <div className="p-3 bg-accent/10 rounded-lg border">
+                <h3 className="text-sm text-muted-foreground mb-1">Total Calories</h3>
+                <p className="text-xl font-semibold text-foreground">{totalCalories}</p>
               </div>
 
-              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
-                <h3 className="text-sm text-gray-600 mb-1">Avg. Daily</h3>
-                <p className="text-xl font-semibold">{averageCalories}</p>
+              <div className="p-3 bg-accent/10 rounded-lg border">
+                <h3 className="text-sm text-muted-foreground mb-1">Avg. Daily</h3>
+                <p className="text-xl font-semibold text-foreground">{averageCalories}</p>
               </div>
             </div>
 
