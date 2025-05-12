@@ -4,48 +4,55 @@ import { useFoodLog } from '../contexts/FoodLogContext';
 import { Progress } from '../components/ui/progress';
 
 const CalorieProgress: React.FC = () => {
-  const { getTodayCalories, getCalorieGoal } = useFoodLog();
+  const { getTodayCalories, getCalorieGoal, todayLog } = useFoodLog();
   
   const calories = getTodayCalories();
   const goal = getCalorieGoal();
   const percentage = Math.min(Math.round((calories / goal) * 100), 100);
   
-  // Calculate remaining calories
-  const remaining = goal - calories;
+  // Calculate protein
+  const totalProtein = todayLog?.meals.reduce((total, meal) => {
+    return total + meal.foods.reduce((mealTotal, food) => mealTotal + (food.protein || 0), 0);
+  }, 0) || 0;
   
-  // Determine color based on percentage
-  let progressColor = 'bg-green-500';
+  // Recommended protein (0.8g per kg of body weight, using 70kg as default)
+  const proteinGoal = 56; // Default daily protein goal in grams
+  const proteinPercentage = Math.min(Math.round((totalProtein / proteinGoal) * 100), 100);
+  
+  // Determine colors based on percentage
+  let calorieColor = 'bg-green-500';
   if (percentage >= 90) {
-    progressColor = 'bg-red-500';
+    calorieColor = 'bg-red-500';
   } else if (percentage >= 75) {
-    progressColor = 'bg-yellow-500';
+    calorieColor = 'bg-yellow-500';
   }
   
   return (
-    <div className="ios-card mb-4 animate-fade-in">
-      <h2 className="text-lg font-semibold mb-2">Today's Calories</h2>
-      
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-sm text-gray-600">
-          {calories} / {goal} kcal
-        </span>
-        <span className="text-sm font-medium">
-          {remaining > 0 ? `${remaining} kcal left` : 'Goal reached'}
-        </span>
+    <div className="ios-card mb-4 animate-fade-in space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Today's Calories</h2>
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-gray-600">
+            {calories} / {goal} kcal
+          </span>
+          <span className="text-sm font-medium">
+            {goal - calories > 0 ? `${goal - calories} kcal left` : 'Goal reached'}
+          </span>
+        </div>
+        <Progress value={percentage} className={`h-2.5 ${calorieColor}`} />
       </div>
-      
-      <Progress value={percentage} className={`h-2.5 ${progressColor}`} />
-      
-      <div className="flex justify-between mt-3">
-        <div>
-          <p className="text-xs text-gray-500">Consumed</p>
-          <p className="font-semibold">{calories} kcal</p>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Protein Intake</h2>
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-gray-600">
+            {totalProtein.toFixed(1)} / {proteinGoal}g
+          </span>
+          <span className="text-sm font-medium">
+            {proteinGoal - totalProtein > 0 ? `${(proteinGoal - totalProtein).toFixed(1)}g left` : 'Goal reached'}
+          </span>
         </div>
-        
-        <div className="text-right">
-          <p className="text-xs text-gray-500">Daily Goal</p>
-          <p className="font-semibold">{goal} kcal</p>
-        </div>
+        <Progress value={proteinPercentage} className="h-2.5 bg-blue-500" />
       </div>
     </div>
   );

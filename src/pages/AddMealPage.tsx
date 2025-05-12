@@ -148,6 +148,17 @@ const AddMealPage: React.FC = () => {
                     className="ios-input w-full"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Protein (g)</label>
+                  <input
+                    type="number"
+                    value={protein}
+                    onChange={(e) => setProtein(e.target.value)}
+                    placeholder="e.g. 20"
+                    className="ios-input w-full"
+                  />
+                </div>
                 
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Serving Size (optional)</label>
