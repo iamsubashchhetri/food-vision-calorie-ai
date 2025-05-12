@@ -93,25 +93,49 @@ const ProfilePage: React.FC = () => {
             Statistics
           </h2>
           
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm text-gray-600 mb-1">Days Tracked</h3>
-              <p className="text-xl font-semibold">{totalDays}</p>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h3 className="text-sm text-gray-600 mb-1">Days Tracked</h3>
+                <p className="text-xl font-semibold">{totalDays}</p>
+              </div>
+              
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h3 className="text-sm text-gray-600 mb-1">Total Meals</h3>
+                <p className="text-xl font-semibold">{totalMeals}</p>
+              </div>
+              
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h3 className="text-sm text-gray-600 mb-1">Total Calories</h3>
+                <p className="text-xl font-semibold">{totalCalories}</p>
+              </div>
+              
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h3 className="text-sm text-gray-600 mb-1">Avg. Daily</h3>
+                <p className="text-xl font-semibold">{averageCalories}</p>
+              </div>
             </div>
-            
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm text-gray-600 mb-1">Total Meals</h3>
-              <p className="text-xl font-semibold">{totalMeals}</p>
-            </div>
-            
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm text-gray-600 mb-1">Total Calories</h3>
-              <p className="text-xl font-semibold">{totalCalories}</p>
-            </div>
-            
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm text-gray-600 mb-1">Avg. Daily</h3>
-              <p className="text-xl font-semibold">{averageCalories}</p>
+
+            <div className="bg-white rounded-lg shadow">
+              <h3 className="text-lg font-semibold p-4 border-b">Daily History</h3>
+              <div className="divide-y">
+                {logs.map((log) => (
+                  <div key={log.date} className="p-4 hover:bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">{format(new Date(log.date), 'MMMM d, yyyy')}</span>
+                      <span className={`font-semibold ${log.totalCalories > getCalorieGoal() ? 'text-red-500' : 'text-green-500'}`}>
+                        {log.totalCalories} kcal
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {log.meals.length} meals · {log.totalCalories > getCalorieGoal() ? 
+                        `${log.totalCalories - getCalorieGoal()} kcal over goal` : 
+                        `${getCalorieGoal() - log.totalCalories} kcal under goal`
+                      }
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
