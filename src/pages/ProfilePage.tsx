@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useFoodLog } from '../contexts/FoodLogContext';
@@ -16,43 +15,43 @@ const ProfilePage: React.FC = () => {
   const [calorieInput, setCalorieInput] = useState(getCalorieGoal().toString());
   const [proteinInput, setProteinInput] = useState(getProteinGoal().toString());
   const [showResetDialog, setShowResetDialog] = useState(false);
-  
+
   const handleSaveGoal = () => {
     const calories = parseInt(calorieInput);
     if (!isNaN(calories) && calories > 0) {
       setCalorieGoal(calories);
     }
   };
-  
+
   // This would be implemented in a real app to clear all user data
   const handleResetData = () => {
     // In a real app, we would clear the data from storage
     setShowResetDialog(false);
-    
+
     // For the demo, we'll just reload the page
     window.location.reload();
   };
-  
+
   // Calculate statistics
   const totalDays = logs.length;
   const totalCalories = logs.reduce((sum, log) => sum + log.totalCalories, 0);
   const averageCalories = totalDays > 0 ? Math.round(totalCalories / totalDays) : 0;
   const totalMeals = logs.reduce((sum, log) => sum + log.meals.length, 0);
-  
+
   return (
     <Layout>
       <div className="px-4 py-6">
         <h1 className="text-2xl font-bold mb-6">Profile</h1>
-        
+
         {!user ? (
-          <div className="ios-card mb-6">
+          <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
             <h2 className="text-lg font-semibold mb-4">Sign In</h2>
             <Button onClick={signInWithGoogle} className="w-full">
               Sign in with Google
             </Button>
           </div>
         ) : (
-          <div className="ios-card mb-6">
+          <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
             <div className="flex items-center gap-4 mb-4">
               <img src={user.photoURL || ''} alt={user.displayName || ''} className="w-12 h-12 rounded-full" />
               <div>
@@ -65,13 +64,13 @@ const ProfilePage: React.FC = () => {
             </Button>
           </div>
         )}
-        
-        <div className="ios-card mb-6">
+
+        <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
           <h2 className="text-lg font-semibold flex items-center mb-4">
             <Sliders className="mr-2" size={18} />
             Goals
           </h2>
-          
+
           <div>
             <label className="block text-sm text-gray-600 mb-1">Daily Calorie Target</label>
             <div className="flex items-center">
@@ -105,31 +104,31 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="ios-card mb-6">
+
+        <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
           <h2 className="text-lg font-semibold flex items-center mb-4">
             <Settings className="mr-2" size={18} />
             Statistics
           </h2>
-          
+
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
                 <h3 className="text-sm text-gray-600 mb-1">Days Tracked</h3>
                 <p className="text-xl font-semibold">{totalDays}</p>
               </div>
-              
-              <div className="p-3 bg-gray-50 rounded-lg">
+
+              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
                 <h3 className="text-sm text-gray-600 mb-1">Total Meals</h3>
                 <p className="text-xl font-semibold">{totalMeals}</p>
               </div>
-              
-              <div className="p-3 bg-gray-50 rounded-lg">
+
+              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
                 <h3 className="text-sm text-gray-600 mb-1">Total Calories</h3>
                 <p className="text-xl font-semibold">{totalCalories}</p>
               </div>
-              
-              <div className="p-3 bg-gray-50 rounded-lg">
+
+              <div className="p-3 bg-gray-800 rounded-lg border border-gray-700">
                 <h3 className="text-sm text-gray-600 mb-1">Avg. Daily</h3>
                 <p className="text-xl font-semibold">{averageCalories}</p>
               </div>
@@ -158,7 +157,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mb-6">
           <Alert variant="destructive" className="bg-red-50">
             <AlertDescription className="flex items-center justify-between">
@@ -173,13 +172,13 @@ const ProfilePage: React.FC = () => {
             </AlertDescription>
           </Alert>
         </div>
-        
+
         <div className="text-center text-gray-500 text-sm">
           <p>NutriCal AI v1.0.0</p>
           <p>Last synced: {format(new Date(), 'MMM d, yyyy h:mm a')}</p>
         </div>
       </div>
-      
+
       {/* Reset data confirmation dialog */}
       <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <DialogContent>
@@ -189,11 +188,11 @@ const ProfilePage: React.FC = () => {
               Reset All Data
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="py-4">
             <p className="text-gray-700">Are you sure you want to reset all your data? This action cannot be undone.</p>
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowResetDialog(false)}>Cancel</Button>
             <Button variant="destructive" onClick={handleResetData}>Reset Everything</Button>

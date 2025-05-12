@@ -15,8 +15,8 @@ const CalorieProgress: React.FC = () => {
     return total + meal.foods.reduce((mealTotal, food) => mealTotal + (food.protein || 0), 0);
   }, 0) || 0;
   
-  // Recommended protein (0.8g per kg of body weight, using 70kg as default)
-  const proteinGoal = 56; // Default daily protein goal in grams
+  const { getProteinGoal } = useFoodLog();
+  const proteinGoal = getProteinGoal();
   const proteinPercentage = Math.min(Math.round((totalProtein / proteinGoal) * 100), 100);
   
   // Determine colors based on percentage
