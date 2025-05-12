@@ -48,7 +48,7 @@ const MealCard: React.FC<MealCardProps> = ({ meal, onExpand }) => {
 
       <div className="flex-1">
         <div className="flex justify-between">
-          <h3 className="font-medium capitalize">{meal.mealType}</h3>
+          <h3 className="font-medium capitalize text-foreground">{meal.mealType}</h3>
           <span className="text-sm text-gray-500">{formattedTime}</span>
         </div>
 

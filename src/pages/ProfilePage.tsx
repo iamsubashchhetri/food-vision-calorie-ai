@@ -78,7 +78,7 @@ const ProfilePage: React.FC = () => {
                 type="number"
                 value={calorieInput}
                 onChange={(e) => setCalorieInput(e.target.value)}
-                className="ios-input mr-2"
+                className="ios-input mr-2 text-foreground"
               />
               <Button onClick={handleSaveGoal} className="ios-button whitespace-nowrap">
                 Save
@@ -134,8 +134,8 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <h3 className="text-lg font-semibold p-4 border-b">Daily History</h3>
+            <div className="bg-accent rounded-lg shadow">
+              <h3 className="text-lg font-semibold p-4 border-b text-foreground">Daily History</h3>
               <div className="divide-y">
                 {logs.map((log) => (
                   <div key={log.date} className="p-4 hover:bg-gray-50">

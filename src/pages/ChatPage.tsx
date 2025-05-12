@@ -80,13 +80,13 @@ const ChatPage: React.FC = () => {
         
         {/* Input area */}
         <div className="border-t border-gray-200 bg-white p-3">
-          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+          <div className="flex items-center bg-accent/50 rounded-full px-4 py-2">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Tell me what you ate..."
-              className="flex-1 bg-transparent outline-none resize-none max-h-24"
+              className="flex-1 bg-transparent outline-none resize-none max-h-24 text-foreground placeholder:text-muted-foreground"
               rows={1}
             />
             <button
