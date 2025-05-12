@@ -18,7 +18,7 @@ const AIContext = createContext<AIContextType | undefined>(undefined);
 const generateResponse = async (prompt: string): Promise<string> => {
   try {
     const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
-    
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: {
@@ -47,7 +47,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
       console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
-    
+
     const aiResponse = data.candidates[0].content.parts[0].text;
 
     try {
@@ -115,8 +115,21 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const response = await generateResponse(text);
       const result = parseChatGPTResponse(response);
 
-      const foodNames = result.map(item => item.name).join(', ');
-      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
+      const analysisResults = result.map(item => {
+        const quantity = parseInt(item.name.match(/^\d+/)?.[0] || '1');
+        const foodName = item.name.replace(/^\d+\s*/, '');
+
+        return {
+          id: uuidv4(),
+          name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
+          calories: item.calories * quantity,
+          protein: item.protein * quantity,
+          serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
+        };
+      });
+
+      const foodNames = analysisResults.map(item => item.name).join(', ');
+      const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
 
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -126,7 +139,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      return result;
+      return analysisResults;
     } catch (error) {
       console.error('Error processing text:', error);
       return [];
@@ -153,8 +166,21 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         result[0].imageUrl = imageUrl;
       }
 
-      const foodNames = result.map(item => item.name).join(', ');
-      const totalCalories = result.reduce((sum, item) => sum + item.calories, 0);
+      const analysisResults = result.map(item => {
+        const quantity = parseInt(item.name.match(/^\d+/)?.[0] || '1');
+        const foodName = item.name.replace(/^\d+\s*/, '');
+
+        return {
+          id: uuidv4(),
+          name: quantity > 1 ? `${quantity}x ${foodName}` : foodName,
+          calories: item.calories * quantity,
+          protein: item.protein * quantity,
+          serving: quantity > 1 ? `${quantity}x ${item.serving}` : item.serving
+        };
+      });
+
+      const foodNames = analysisResults.map(item => item.name).join(', ');
+      const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
 
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -164,7 +190,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      return result;
+      return analysisResults;
     } catch (error) {
       console.error('Error processing image:', error);
       return [];
