@@ -22,15 +22,17 @@ const AddMealPage: React.FC = () => {
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [serving, setServing] = useState('');
+  const [quantity, setQuantity] = useState('1');
   
   const handleAddFoodItem = () => {
     if (foodName && calories) {
+      const qty = parseInt(quantity) || 1;
       const newItem: FoodItemType = {
         id: uuidv4(),
-        name: foodName,
-        calories: parseInt(calories),
-        protein: protein ? parseFloat(protein) : 0,
-        serving: serving || undefined
+        name: qty > 1 ? `${qty}x ${foodName}` : foodName,
+        calories: parseInt(calories) * qty,
+        protein: (protein ? parseFloat(protein) : 0) * qty,
+        serving: qty > 1 ? `${qty}x ${serving || ''}` : (serving || undefined)
       };
       
       setFoodItems([...foodItems, newItem]);
@@ -40,6 +42,7 @@ const AddMealPage: React.FC = () => {
       setCalories('');
       setProtein('');
       setServing('');
+      setQuantity('1');
       setShowAddFood(false);
     }
   };
@@ -133,12 +136,22 @@ const AddMealPage: React.FC = () => {
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Food Name</label>
-                  <input
-                    value={foodName}
-                    onChange={(e) => setFoodName(e.target.value)}
-                    placeholder="e.g. Apple"
-                    className="ios-input w-full"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      placeholder="Qty"
+                      className="ios-input w-20"
+                    />
+                    <input
+                      value={foodName}
+                      onChange={(e) => setFoodName(e.target.value)}
+                      placeholder="e.g. Apple"
+                      className="ios-input flex-1"
+                    />
+                  </div>
                 </div>
                 
                 <div>
