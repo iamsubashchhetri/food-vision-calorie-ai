@@ -14,6 +14,8 @@ interface FoodLogContextType {
   getTodayCalories: () => number;
   getCalorieGoal: () => number;
   setCalorieGoal: (goal: number) => void;
+  getProteinGoal: () => number;
+  setProteinGoal: (goal: number) => void;
 }
 
 const FoodLogContext = createContext<FoodLogContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ const FoodLogContext = createContext<FoodLogContextType | undefined>(undefined);
 export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [calorieGoal, setCalorieGoal] = useState<number>(2000);
+  const [proteinGoal, setProteinGoal] = useState<number>(50);
 
   // Load saved data on mount
   useEffect(() => {
@@ -31,9 +34,14 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setLogs(JSON.parse(savedLogs));
         }
         
-        const savedGoal = localStorage.getItem('calorieGoal');
-        if (savedGoal) {
-          setCalorieGoal(Number(savedGoal));
+        const savedCalorieGoal = localStorage.getItem('calorieGoal');
+        if (savedCalorieGoal) {
+          setCalorieGoal(Number(savedCalorieGoal));
+        }
+
+        const savedProteinGoal = localStorage.getItem('proteinGoal');
+        if (savedProteinGoal) {
+          setProteinGoal(Number(savedProteinGoal));
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -60,6 +68,14 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       console.error('Error saving calorie goal:', error);
     }
   }, [calorieGoal]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('proteinGoal', proteinGoal.toString());
+    } catch (error) {
+      console.error('Error saving protein goal:', error);
+    }
+  }, [proteinGoal]);
 
   // Get today's log or create a new one
   const todayLog = logs.find(
@@ -203,6 +219,8 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     getTodayCalories,
     getCalorieGoal,
     setCalorieGoal: setUserCalorieGoal,
+    getProteinGoal: () => proteinGoal,
+    setProteinGoal,
   };
 
   return <FoodLogContext.Provider value={value}>{children}</FoodLogContext.Provider>;
