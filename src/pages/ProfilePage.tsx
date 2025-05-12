@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useFoodLog } from '../contexts/FoodLogContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Sliders, Settings, Trash2 } from 'lucide-react';
