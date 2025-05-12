@@ -105,7 +105,7 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-gray-900 rounded-lg p-6 shadow-xl mb-6 border border-gray-800">
+        <div className="bg-card rounded-lg p-6 shadow-sm mb-6 border">
           <h2 className="text-lg font-semibold flex items-center mb-4">
             <Settings className="mr-2" size={18} />
             Statistics
