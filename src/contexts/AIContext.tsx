@@ -39,13 +39,11 @@ const generateResponse = async (prompt: string): Promise<string> => {
     });
 
     if (!response.ok) {
-      console.error('API Response:', response);
       throw new Error(`Request failed with status ${response.status}`);
     }
 
     const data = await response.json();
     if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error('Invalid API response structure:', data);
       throw new Error('Invalid API response structure');
     }
 
@@ -68,11 +66,7 @@ const generateResponse = async (prompt: string): Promise<string> => {
     }]);
 
   } catch (error) {
-    console.error('Error in generateResponse:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
+    console.error('Error in generateResponse:', error);
     return JSON.stringify([]);
   }
 };
@@ -207,26 +201,30 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           throw new Error('Expected array response');
         }
 
-      const analysisResults = result.map(item => ({
-        id: uuidv4(),
-        name: item.name,
-        calories: Math.round(item.calories),
-        protein: parseFloat(item.protein.toFixed(1)),
-        serving: item.serving
-      }));
+        const analysisResults = result.map(item => ({
+          id: uuidv4(),
+          name: item.name,
+          calories: Math.round(item.calories),
+          protein: parseFloat(item.protein.toFixed(1)),
+          serving: item.serving
+        }));
 
-      const foodNames = analysisResults.map(item => item.name).join(', ');
-      const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
+        const foodNames = analysisResults.map(item => item.name).join(', ');
+        const totalCalories = analysisResults.reduce((sum, item) => sum + item.calories, 0);
 
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
-        timestamp: formatISO(new Date())
-      };
+        const assistantMessage: Message = {
+          id: uuidv4(),
+          role: 'assistant',
+          content: `I identified: ${foodNames}. Total calories: ${totalCalories} kcal.`,
+          timestamp: formatISO(new Date())
+        };
 
-      setMessages(prev => [...prev, assistantMessage]);
-      return analysisResults;
+        setMessages(prev => [...prev, assistantMessage]);
+        return analysisResults;
+      } catch (error) {
+        console.error('Error parsing result:', error);
+        return [];
+      }
     } catch (error) {
       console.error('Error processing image:', error);
       return [];
