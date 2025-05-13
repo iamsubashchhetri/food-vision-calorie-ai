@@ -27,6 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+      // Force a reload of the auth state
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await currentUser.reload();
+      }
     } catch (error) {
       console.error('Error signing in with Google:', error);
     }

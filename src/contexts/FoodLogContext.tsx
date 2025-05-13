@@ -29,25 +29,31 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        // Subscribe to user's data
-        const userDocRef = doc(db, 'users', user.uid);
-        const unsubscribeSnapshot = onSnapshot(userDocRef, (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
-            setLogs(data.logs || []);
-            setCalorieGoal(data.calorieGoal || 2000);
-            setProteinGoal(data.proteinGoal || 50);
-          } else {
-            // Initialize document if it doesn't exist
-            setDoc(userDocRef, {
-              logs: [],
-              calorieGoal: 2000,
-              proteinGoal: 50
-            });
-          }
-        });
+        try {
+          // Subscribe to user's data
+          const userDocRef = doc(db, 'users', user.uid);
+          const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+              const data = docSnapshot.data();
+              setLogs(data.logs || []);
+              setCalorieGoal(data.calorieGoal || 2000);
+              setProteinGoal(data.proteinGoal || 50);
+            } else {
+              // Initialize document if it doesn't exist
+              setDoc(userDocRef, {
+                logs: [],
+                calorieGoal: 2000,
+                proteinGoal: 50
+              });
+            }
+          }, (error) => {
+            console.error("Error loading data:", error);
+          });
 
-        return () => unsubscribeSnapshot();
+          return () => unsubscribeSnapshot();
+        } catch (error) {
+          console.error("Error setting up data sync:", error);
+        }
       } else {
         // Reset state when user logs out
         setLogs([]);
