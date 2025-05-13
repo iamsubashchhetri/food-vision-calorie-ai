@@ -1,8 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { DailyLog, MealEntry, FoodItem, MealType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import { formatISO, parseISO, format, startOfDay } from 'date-fns';
+import { formatISO, parseISO, format } from 'date-fns';
+import { auth, db } from '../lib/firebase';
+import { collection, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
 interface FoodLogContextType {
   logs: DailyLog[];
@@ -25,63 +26,44 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [calorieGoal, setCalorieGoal] = useState<number>(2000);
   const [proteinGoal, setProteinGoal] = useState<number>(50);
 
-  // Load saved data on mount
   useEffect(() => {
-    const loadSavedLogs = async () => {
-      try {
-        const user = auth.currentUser;
-        const storageKey = user ? `foodLogs_${user.uid}` : 'foodLogs';
-        const savedLogs = localStorage.getItem(storageKey);
-        if (savedLogs) {
-          setLogs(JSON.parse(savedLogs));
-        }
-        
-        const savedCalorieGoal = localStorage.getItem('calorieGoal');
-        if (savedCalorieGoal) {
-          setCalorieGoal(Number(savedCalorieGoal));
-        }
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Subscribe to user's data
+        const userDocRef = doc(db, 'users', user.uid);
+        const unsubscribeSnapshot = onSnapshot(userDocRef, (doc) => {
+          if (doc.exists()) {
+            const data = doc.data();
+            setLogs(data.logs || []);
+            setCalorieGoal(data.calorieGoal || 2000);
+            setProteinGoal(data.proteinGoal || 50);
+          }
+        });
 
-        const savedProteinGoal = localStorage.getItem('proteinGoal');
-        if (savedProteinGoal) {
-          setProteinGoal(Number(savedProteinGoal));
-        }
-      } catch (error) {
-        console.error('Error loading data:', error);
+        return () => unsubscribeSnapshot();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Save data to Firestore whenever it changes
+  useEffect(() => {
+    const saveToFirestore = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userDocRef = doc(db, 'users', user.uid);
+        await setDoc(userDocRef, {
+          logs,
+          calorieGoal,
+          proteinGoal
+        }, { merge: true });
       }
     };
 
-    loadSavedLogs();
-  }, []);
+    saveToFirestore();
+  }, [logs, calorieGoal, proteinGoal]);
 
-  // Save logs when they change
-  useEffect(() => {
-    try {
-      const user = auth.currentUser;
-      const storageKey = user ? `foodLogs_${user.uid}` : 'foodLogs';
-      localStorage.setItem(storageKey, JSON.stringify(logs));
-    } catch (error) {
-      console.error('Error saving logs:', error);
-    }
-  }, [logs]);
-
-  // Save calorie goal when it changes
-  useEffect(() => {
-    try {
-      localStorage.setItem('calorieGoal', calorieGoal.toString());
-    } catch (error) {
-      console.error('Error saving calorie goal:', error);
-    }
-  }, [calorieGoal]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('proteinGoal', proteinGoal.toString());
-    } catch (error) {
-      console.error('Error saving protein goal:', error);
-    }
-  }, [proteinGoal]);
-
-  // Get today's log or create a new one
   const todayLog = logs.find(
     (log) => log.date === format(new Date(), 'yyyy-MM-dd')
   ) || {
@@ -92,7 +74,7 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addMealEntry = (foods: FoodItem[], mealType: MealType, imageUrl?: string, notes?: string) => {
     const totalCalories = foods.reduce((sum, food) => sum + food.calories, 0);
-    
+
     const newMealEntry: MealEntry = {
       id: uuidv4(),
       timestamp: formatISO(new Date()),
@@ -104,13 +86,11 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const today = format(new Date(), 'yyyy-MM-dd');
-    
+
     setLogs((prevLogs) => {
-      // Check if today's log exists
       const todayLogIndex = prevLogs.findIndex((log) => log.date === today);
-      
+
       if (todayLogIndex >= 0) {
-        // Update today's log
         const updatedLogs = [...prevLogs];
         updatedLogs[todayLogIndex] = {
           ...updatedLogs[todayLogIndex],
@@ -119,7 +99,6 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
         return updatedLogs;
       } else {
-        // Create new log for today
         return [
           ...prevLogs,
           {
@@ -167,7 +146,7 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
           if (meal.id === mealEntryId) {
             const foodToRemove = meal.foods.find((food) => food.id === foodId);
             const updatedFoods = meal.foods.filter((food) => food.id !== foodId);
-            
+
             return {
               ...meal,
               foods: updatedFoods,
@@ -191,13 +170,13 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return prevLogs.map((log) => {
         const mealToRemove = log.meals.find((meal) => meal.id === mealEntryId);
         const updatedMeals = log.meals.filter((meal) => meal.id !== mealEntryId);
-        
+
         return {
           ...log,
           meals: updatedMeals,
           totalCalories: log.totalCalories - (mealToRemove?.totalCalories || 0),
         };
-      }).filter((log) => log.meals.length > 0); // Remove empty logs
+      }).filter((log) => log.meals.length > 0);
     });
   };
 
@@ -213,11 +192,6 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCalorieGoal(goal);
   };
 
-  const clearData = () => {
-    setLogs([]);
-    localStorage.removeItem('foodLogs');
-  };
-
   const value = {
     logs,
     todayLog,
@@ -230,7 +204,6 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setCalorieGoal: setUserCalorieGoal,
     getProteinGoal: () => proteinGoal,
     setProteinGoal,
-    clearData,
   };
 
   return <FoodLogContext.Provider value={value}>{children}</FoodLogContext.Provider>;
