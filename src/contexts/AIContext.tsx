@@ -154,12 +154,48 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       };
 
       setMessages(prev => [...prev, userMessage]);
-      const response = await generateResponse("Default food item");
-      const result = parseChatGPTResponse(response);
-
-      if (result.length > 0) {
-        result[0].imageUrl = imageUrl;
+      
+      // Convert base64 image to binary
+      const base64Data = imageUrl.split(',')[1];
+      const binaryData = atob(base64Data);
+      const byteArray = new Uint8Array(binaryData.length);
+      for (let i = 0; i < binaryData.length; i++) {
+        byteArray[i] = binaryData.charCodeAt(i);
       }
+
+      const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: "Analyze this food image and provide a JSON array with the food items, their calories, protein content and serving size. Format: [{name: string, calories: number, protein: number, serving: string}]"
+              },
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: base64Data
+                }
+              }
+            ]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API request failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.candidates[0].content.parts[0].text;
+      
+      try {
+        const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+        const result = JSON.parse(jsonStr);
 
       const analysisResults = result.map(item => ({
         id: uuidv4(),

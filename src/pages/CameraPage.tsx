@@ -40,10 +40,15 @@ const CameraPage: React.FC = () => {
     
     try {
       const results = await processImage(imageUrl);
-      setAnalysisResults(results);
-      setShowResults(true);
+      if (results && results.length > 0) {
+        setAnalysisResults(results);
+        setShowResults(true);
+      } else {
+        toast.error('No food items detected in the image');
+      }
     } catch (error) {
       console.error('Error processing image:', error);
+      toast.error('Failed to analyze the image. Please try again.');
     } finally {
       setIsProcessing(false);
     }
