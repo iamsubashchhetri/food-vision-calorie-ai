@@ -1,0 +1,15 @@
+[vite] connecting...
+[vite] connected.
+Error processing image: 
+DOMException {}
+stack: "InvalidCharacterError: Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.↵ at processImage (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/src/contexts/AIContext.tsx:153:32)↵ at handleCapturePhoto (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/src/pages/CameraPage.tsx:45:35)↵ at onChange (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/src/pages/CameraPage.tsx:255:57)↵ at HTMLUnknownElement.callCallback2 (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:3674:22)↵ at Object.invokeGuardedCallbackDev (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:3699:24)↵ at invokeGuardedCallback (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:3733:39)↵ at invokeGuardedCallbackAndCatchFirstError (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:3736:33)↵ at executeDispatch (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:7014:11)↵ at processDispatchQueueItemsInOrder (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:7034:15)↵ at processDispatchQueue (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/node_modules/.vite/deps/chunk-T2SWDQEL.js?v=3a77eb28:7043:13)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: DOMException
+
+at t.value (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://d23ae0a4-f436-40c6-a203-5164438f936f-00-2qir7bixy9kk3.riker.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Error processing image: 
+DOMException {}
