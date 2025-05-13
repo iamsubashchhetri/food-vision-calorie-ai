@@ -38,19 +38,29 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
         try {
           const userDocRef = doc(db, 'users', user.uid);
           
-          // First check if the document exists
+          // First check if the document exists and load initial data
           const docSnap = await getDoc(userDocRef);
           
-          if (!docSnap.exists()) {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setLogs(data.logs || []);
+            setCalorieGoal(data.calorieGoal || 2000);
+            setProteinGoal(data.proteinGoal || 50);
+          } else {
             // Initialize the document with default values
-            await setDoc(userDocRef, {
+            const defaultData = {
               logs: [],
               calorieGoal: 2000,
-              proteinGoal: 50
-            });
+              proteinGoal: 50,
+              createdAt: new Date().toISOString()
+            };
+            await setDoc(userDocRef, defaultData);
+            setLogs([]);
+            setCalorieGoal(2000);
+            setProteinGoal(50);
           }
 
-          // Set up real-time listener
+          // Set up real-time listener for updates
           const unsub = onSnapshot(userDocRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
               const data = docSnapshot.data();
