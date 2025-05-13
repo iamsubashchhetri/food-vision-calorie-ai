@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useState } from 'react';
@@ -51,7 +52,6 @@ const generateResponse = async (prompt: string): Promise<string> => {
     const aiResponse = data.candidates[0].content.parts[0].text;
 
     try {
-      // Remove markdown code block if present
       const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
       const parsedResponse = JSON.parse(jsonStr);
       if (Array.isArray(parsedResponse)) {
@@ -61,7 +61,6 @@ const generateResponse = async (prompt: string): Promise<string> => {
       console.error('Invalid JSON response from AI:', aiResponse);
     }
 
-    // Default response if parsing fails
     return JSON.stringify([{
       name: prompt.trim(),
       calories: 0,
@@ -155,7 +154,6 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       setMessages(prev => [...prev, userMessage]);
       
-      // Convert base64 image to binary
       const base64Data = imageUrl.split(',')[1];
       const binaryData = atob(base64Data);
       const byteArray = new Uint8Array(binaryData.length);
@@ -193,9 +191,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const data = await response.json();
       const aiResponse = data.candidates[0].content.parts[0].text;
       
-      try {
-        const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
-        const result = JSON.parse(jsonStr);
+      const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
+      const result = JSON.parse(jsonStr);
 
       const analysisResults = result.map(item => ({
         id: uuidv4(),
