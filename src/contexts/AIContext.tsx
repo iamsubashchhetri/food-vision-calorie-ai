@@ -171,15 +171,24 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
                 text: "Analyze this food image and provide a JSON array with the food items, their calories, protein content and serving size. Format: [{name: string, calories: number, protein: number, serving: string}]"
               },
               {
-                inline_data: {
-                  mime_type: "image/jpeg",
+                inlineData: {
+                  mimeType: "image/jpeg",
                   data: base64Data
                 }
               }
             ]
-          }]
+          }],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 32,
+            topP: 1
+          }
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`Gemini API request failed: ${response.statusText}`);
+      }
 
       if (!response.ok) {
         throw new Error(`Gemini API request failed: ${response.statusText}`);
