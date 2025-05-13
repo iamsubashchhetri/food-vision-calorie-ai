@@ -29,7 +29,9 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     const loadSavedLogs = async () => {
       try {
-        const savedLogs = localStorage.getItem('foodLogs');
+        const user = auth.currentUser;
+        const storageKey = user ? `foodLogs_${user.uid}` : 'foodLogs';
+        const savedLogs = localStorage.getItem(storageKey);
         if (savedLogs) {
           setLogs(JSON.parse(savedLogs));
         }
@@ -54,7 +56,9 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Save logs when they change
   useEffect(() => {
     try {
-      localStorage.setItem('foodLogs', JSON.stringify(logs));
+      const user = auth.currentUser;
+      const storageKey = user ? `foodLogs_${user.uid}` : 'foodLogs';
+      localStorage.setItem(storageKey, JSON.stringify(logs));
     } catch (error) {
       console.error('Error saving logs:', error);
     }
