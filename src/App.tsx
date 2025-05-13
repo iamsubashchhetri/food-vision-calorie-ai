@@ -2,7 +2,7 @@
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CameraPage from "./pages/CameraPage";
@@ -22,7 +22,7 @@ const App = () => (
         <FoodLogProvider>
           <AIProvider>
             <Toaster />
-            <BrowserRouter>
+            <HashRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/camera" element={<CameraPage />} />
@@ -31,7 +31,7 @@ const App = () => (
                 <Route path="/add-meal" element={<AddMealPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+            </HashRouter>
           </AIProvider>
         </FoodLogProvider>
       </AuthProvider>
