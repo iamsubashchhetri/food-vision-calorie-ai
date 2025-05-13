@@ -143,6 +143,11 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const processImage = async (imageUrl: string): Promise<FoodItem[]> => {
+    if (!imageUrl) {
+      console.error('No image URL provided');
+      return [];
+    }
+    
     try {
       setIsProcessing(true);
       const userMessage: Message = {
@@ -189,10 +194,18 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const data = await response.json();
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        throw new Error('Invalid API response structure');
+      }
       
+      const aiResponse = data.candidates[0].content.parts[0].text;
       const jsonStr = aiResponse.replace(/```json\n|\n```/g, '').trim();
-      const result = JSON.parse(jsonStr);
+      
+      try {
+        const result = JSON.parse(jsonStr);
+        if (!Array.isArray(result)) {
+          throw new Error('Expected array response');
+        }
 
       const analysisResults = result.map(item => ({
         id: uuidv4(),
