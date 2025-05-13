@@ -187,18 +187,12 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       let attempts = 0;
       const maxAttempts = 3;
       let lastError: Error | null = null;
-      const MODEL_ENDPOINTS = [
-        'v1/models/gemini-pro-vision',
-        'v1/models/gemini-1.5-pro-vision',
-        'v1beta/models/gemini-pro-vision'
-      ];
+      const MODEL_ENDPOINT = 'v1beta/models/gemini-pro-vision';
       let jsonStr = '';
 
       while (attempts < maxAttempts) {
         try {
-          // Try different model endpoints in case one is unavailable
-          const endpoint = MODEL_ENDPOINTS[attempts % MODEL_ENDPOINTS.length];
-          const response = await fetch(`https://generativelanguage.googleapis.com/${endpoint}:generateContent?key=${API_KEY}`, {
+          const response = await fetch(`https://generativelanguage.googleapis.com/${MODEL_ENDPOINT}:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
