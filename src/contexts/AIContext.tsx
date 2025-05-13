@@ -227,7 +227,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
     } catch (error) {
       console.error('Error processing image:', error);
-      return [];
+      throw error;
     } finally {
       setIsProcessing(false);
     }

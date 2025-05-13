@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { Camera, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAI } from '../contexts/AIContext';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useFoodLog } from '../contexts/FoodLogContext';
 import CameraView from '../components/CameraView';
 import FoodItem from '../components/FoodItem';
