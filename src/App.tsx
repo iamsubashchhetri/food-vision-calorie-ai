@@ -27,7 +27,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/camera" element={<CameraPage />} />
                 <Route path="/chat" element={<ChatPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="/add-meal" element={<AddMealPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
