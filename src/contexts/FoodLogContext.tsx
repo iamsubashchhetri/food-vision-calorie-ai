@@ -37,10 +37,22 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setLogs(data.logs || []);
             setCalorieGoal(data.calorieGoal || 2000);
             setProteinGoal(data.proteinGoal || 50);
+          } else {
+            // Initialize document if it doesn't exist
+            setDoc(userDocRef, {
+              logs: [],
+              calorieGoal: 2000,
+              proteinGoal: 50
+            });
           }
         });
 
         return () => unsubscribeSnapshot();
+      } else {
+        // Reset state when user logs out
+        setLogs([]);
+        setCalorieGoal(2000);
+        setProteinGoal(50);
       }
     });
 
