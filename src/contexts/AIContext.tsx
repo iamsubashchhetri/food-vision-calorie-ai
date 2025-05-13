@@ -153,11 +153,9 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       setMessages(prev => [...prev, userMessage]);
       
-      const base64Data = imageUrl.split(',')[1];
-      const binaryData = atob(base64Data);
-      const byteArray = new Uint8Array(binaryData.length);
-      for (let i = 0; i < binaryData.length; i++) {
-        byteArray[i] = binaryData.charCodeAt(i);
+      let base64Data = imageUrl;
+      if (imageUrl.includes(',')) {
+        base64Data = imageUrl.split(',')[1];
       }
 
       const API_KEY = 'AIzaSyCc3d2OB5DbIiciMtiVfUN1-kRf7lX81EQ';
@@ -173,8 +171,8 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
                 text: "Analyze this food image and provide a JSON array with the food items, their calories, protein content and serving size. Format: [{name: string, calories: number, protein: number, serving: string}]"
               },
               {
-                inlineData: {
-                  mimeType: "image/jpeg",
+                inline_data: {
+                  mime_type: "image/jpeg",
                   data: base64Data
                 }
               }
