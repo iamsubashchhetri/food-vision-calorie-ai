@@ -191,7 +191,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       while (attempts < maxAttempts) {
         try {
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${API_KEY}`, {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
