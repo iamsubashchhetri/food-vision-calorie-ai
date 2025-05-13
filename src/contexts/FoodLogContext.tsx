@@ -25,32 +25,44 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [logs, setLogs] = useState<DailyLog[]>([]);
   const [calorieGoal, setCalorieGoal] = useState<number>(2000);
   const [proteinGoal, setProteinGoal] = useState<number>(50);
+  const [unsubscribeSnapshot, setUnsubscribeSnapshot] = useState<(() => void) | null>(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      // Cleanup previous subscription if exists
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+
       if (user) {
         try {
-          // Subscribe to user's data
           const userDocRef = doc(db, 'users', user.uid);
-          const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnapshot) => {
+          
+          // First check if the document exists
+          const docSnap = await getDoc(userDocRef);
+          
+          if (!docSnap.exists()) {
+            // Initialize the document with default values
+            await setDoc(userDocRef, {
+              logs: [],
+              calorieGoal: 2000,
+              proteinGoal: 50
+            });
+          }
+
+          // Set up real-time listener
+          const unsub = onSnapshot(userDocRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
               const data = docSnapshot.data();
               setLogs(data.logs || []);
               setCalorieGoal(data.calorieGoal || 2000);
               setProteinGoal(data.proteinGoal || 50);
-            } else {
-              // Initialize document if it doesn't exist
-              setDoc(userDocRef, {
-                logs: [],
-                calorieGoal: 2000,
-                proteinGoal: 50
-              });
             }
           }, (error) => {
             console.error("Error loading data:", error);
           });
 
-          return () => unsubscribeSnapshot();
+          setUnsubscribeSnapshot(() => unsub);
         } catch (error) {
           console.error("Error setting up data sync:", error);
         }
@@ -62,7 +74,12 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+      unsubscribe();
+    };
   }, []);
 
   // Save data to Firestore whenever it changes
@@ -70,16 +87,22 @@ export const FoodLogProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const saveToFirestore = async () => {
       const user = auth.currentUser;
       if (user) {
-        const userDocRef = doc(db, 'users', user.uid);
-        await setDoc(userDocRef, {
-          logs,
-          calorieGoal,
-          proteinGoal
-        }, { merge: true });
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          await setDoc(userDocRef, {
+            logs,
+            calorieGoal,
+            proteinGoal,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        } catch (error) {
+          console.error("Error saving data:", error);
+        }
       }
     };
 
-    saveToFirestore();
+    const debounceTimeout = setTimeout(saveToFirestore, 1000);
+    return () => clearTimeout(debounceTimeout);
   }, [logs, calorieGoal, proteinGoal]);
 
   const todayLog = logs.find(
